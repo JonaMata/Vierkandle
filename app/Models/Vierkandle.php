@@ -11,8 +11,6 @@ class Vierkandle extends Model
 {
     use HasFactory;
 
-    protected $appends = ['solutions'];
-
     public function solutions(): HasMany
     {
         return $this->hasMany(VierkandleSolution::class);

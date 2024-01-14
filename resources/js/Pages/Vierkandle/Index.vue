@@ -18,11 +18,11 @@ const useLocalStorage = !!localStorage;
 onMounted(() => {
     const guessedWords: string[] = []
     if (useLocalStorage) {
-        const guessedWordsString = localStorage.getItem('vierkandle_' + props.vierkandle.date);
+        const guessedWordsString = localStorage.getItem('vierkandle_' + props.vierkandle.id);
         if (guessedWordsString) {
             guessedWords.push(...JSON.parse(guessedWordsString));
         } else {
-            localStorage.setItem('vierkandle_' + props.vierkandle.date, JSON.stringify(guessedWords));
+            localStorage.setItem('vierkandle_' + props.vierkandle.id, JSON.stringify(guessedWords));
         }
     }
     for (const solution of props.vierkandle.solutions) {
@@ -107,9 +107,11 @@ const guessWord = () => {
         if (length in solutions.value && word in solutions.value[length]) {
             if (!solutions.value[length][word].guessed) {
                 solutions.value[length][word].guessed = true;
-                const guessedWords: string[] = JSON.parse(localStorage.getItem('vierkandle_' + props.vierkandle.date) ?? '[]');
-                guessedWords.push(word);
-                localStorage.setItem('vierkandle_' + props.vierkandle.date, JSON.stringify(guessedWords));
+                if (useLocalStorage) {
+                    const guessedWords: string[] = JSON.parse(localStorage.getItem('vierkandle_' + props.vierkandle.id) ?? '[]');
+                    guessedWords.push(word);
+                    localStorage.setItem('vierkandle_' + props.vierkandle.id, JSON.stringify(guessedWords));
+                }
                 if (!message) {
                     message += 'Goed geraden: ';
                 }

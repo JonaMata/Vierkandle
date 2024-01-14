@@ -16,6 +16,8 @@ use Inertia\Inertia;
 */
 
 Route::get('', [\App\Http\Controllers\VierkandleController::class, 'index'])->name('index');
+Route::get('/list', [\App\Http\Controllers\VierkandleController::class, 'list'])->name('list');
+Route::get('/{vierkandle}', [\App\Http\Controllers\VierkandleController::class, 'show'])->name('show');
 
 //Route::get('/', function () {
 //    return Inertia::render('Welcome', [
