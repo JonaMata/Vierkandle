@@ -12,7 +12,7 @@ class VierkandleController extends Controller
     public function index()
     {
         return Inertia::render('Vierkandle/Index', [
-            'vierkandle' => Vierkandle::query()->where('date', Carbon::tomorrow())->first(),
+            'vierkandle' => Vierkandle::query()->where('date', Carbon::today())->first(),
         ]);
     }
 }
