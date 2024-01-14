@@ -10,14 +10,14 @@ defineProps<{
 </script>
 
 <template>
-<div class="vierkand" :class="(start == 0 && includes == 0) ? 'used' : ''">
+<div class="relative bg-gray-300 dark:bg-gray-900 rounded-lg vierkand" :class="(start == 0 && includes == 0) ? 'used' : ''">
     <div class="letter">
         {{ letter }}
     </div>
-    <div v-if="showStart" class="start">
+    <div v-if="showStart" class="start font-semibold">
         {{ start }}
     </div>
-    <div v-if="showIncludes" class="includes">
+    <div v-if="showIncludes" class="includes font-semibold text-gray-500">
         {{ includes }}
     </div>
     <div v-if="isStart" class="selected"></div>
@@ -26,11 +26,8 @@ defineProps<{
 
 <style scoped>
 .vierkand {
-    position: relative;
     width: min(20svw, 10svh);
     height: min(20svw, 10svh);
-    background: lightgray;
-    border-radius: 10px;
 }
 
 .used {

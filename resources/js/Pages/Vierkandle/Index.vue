@@ -4,6 +4,9 @@ import Vierkand from "@/Components/Vierkandle/Vierkand.vue";
 import {computed, onMounted, ref} from "vue";
 import Connection from "@/Components/Vierkandle/Connection.vue";
 import Checkbox from "@/Components/Checkbox.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import BasicLayout from "@/Layouts/BasicLayout.vue";
+import NavLink from "@/Components/NavLink.vue";
 
 const props = defineProps<{
     vierkandle: { letters: string, solutions: Array<{ word: string, chain: string, bonus: boolean }> },
@@ -190,27 +193,37 @@ const findNeighbours = (index: number): number[] => {
 </script>
 
 <template>
-    <AppLayout title="Vierkandle">
+    <BasicLayout title="Vierkandle">
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <div class="flex items-baseline gap-2"><h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Vierkandle
             </h2>
+            <h3 class="text-sm text-gray-500 dark:text-gray-400">
+                door <a href="https://github.com/JonaMata" target="_blank" class="underline transition cursor-pointer hover:text-gray-400 dark:hover:text-gray-500">Jonathan Matarazzi</a>
+            </h3></div>
         </template>
 
-        <div class="py-4" @click="() => inputField?.focus()">
+        <div class="py-4 dark:text-white" @click="() => inputField?.focus()">
             <input class="opacity-0 fixed top-full" v-model="input" ref="inputField" @input="handleInput"
                    @keydown.enter="guessWord"/>
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg max-h-[75svh]">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[85svh] max-h-[85svh]">
                     <div
-                        class="m-5 grid grid-cols-1 md:grid-cols-3 items-start content-start max-h-[70svh] overflow-scroll md:overflow-hidden">
-                        <div class="mx-auto md:mx-0 md:max-h-[70svh] md:overflow-scroll">
-                            <div v-if="amountGuessed/totalWords >= .6">
-                                <Checkbox id="hint-missing" v-model="hintMissing"/>
-                                <label for="hint-missing">Show missing words</label></div>
-                            <div v-if="amountGuessed/totalWords >= .6">
-                                <Checkbox id="hint-letters" v-model="hintLetters"/>
-                                <label for="hint-letters">Show some letters</label></div>
+                        class="m-5 grid grid-cols-1 md:grid-cols-3 items-start content-start h-[80svh] max-h-[80svh] overflow-scroll md:overflow-hidden">
+                        <div class="mx-auto md:mx-0 md:max-h-[80svh] md:overflow-scroll">
+                            <div class="mb-2" v-if="amountGuessed/totalWords >= .6">
+                                <h1 class="text-2xl font-bold mb-2">Hints:</h1>
+                                <label class="flex items-center">
+                                    <Checkbox v-model:checked="hintMissing" name="hint-missing"/>
+                                    <span
+                                        class="ms-2 text-sm text-gray-600 dark:text-gray-400">Show missing words</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <Checkbox v-model:checked="hintLetters" name="hint-letters"/>
+                                    <span
+                                        class="ms-2 text-sm text-gray-600 dark:text-gray-400">Reveal some letters</span>
+                                </label>
+                            </div>
                             <div class="mb-4" v-for="(subSolutions, num) in solutions">
                                 <h1 class="text-2xl font-bold mb-2">
                                     <template v-if="num == 777">
@@ -220,14 +233,14 @@ const findNeighbours = (index: number): number[] => {
                                         {{ num }} letter woorden:
                                     </template>
                                 </h1>
-                                <div class="flex flex-wrap gap-2 ">
+                                <div class="flex flex-wrap gap-2">
                                     <template v-for="(data, word) in subSolutions">
-                                        <div class="font-bold" v-if="data.guessed">{{ word }}</div>
-                                        <div v-else-if="hintLetters" class="font-bold text-gray-400">{{
+                                        <div v-if="data.guessed">{{ word }}</div>
+                                        <div v-else-if="hintLetters" class="text-gray-400">{{
                                                 word.substring(0, Math.ceil(word.length / 6)) + '*'.repeat((word.length - Math.floor(word.length / 6)) - (Math.ceil(word.length / 6))) + word.substring(word.length - Math.floor(word.length / 6), word.length)
                                             }}
                                         </div>
-                                        <div v-else-if="hintMissing" class="font-bold text-gray-400">
+                                        <div v-else-if="hintMissing" class="text-gray-400">
                                             {{ '*'.repeat(word.length) }}
                                         </div>
                                     </template>
@@ -243,7 +256,7 @@ const findNeighbours = (index: number): number[] => {
                             <div class="w-fit">
                                 <h1 class="text-4xl text-center font-bold mb-2">{{ amountGuessed }}/{{ totalWords }}
                                     woorden</h1>
-                                <div class="w-full h-7 rounded border border-black mb-2 relative">
+                                <div class="w-full h-7 rounded overflow-hidden border border-black mb-2 relative">
                                     <div class="absolute h-full bg-red-500 transition-all"
                                          :style="`width: ${amountGuessed/totalWords*100}%`"></div>
                                     <div class="absolute transition-all"
@@ -260,7 +273,7 @@ const findNeighbours = (index: number): number[] => {
                                               :class="showResult ? '' : 'opacity-0'">
                                     {{ resultMessage }}
                                     </span>
-                                    <span :class="input.length < 4 ? 'text-gray-500' : ''">
+                                        <span :class="input.length < 4 ? 'text-gray-500' : ''">
                                         {{ input }}
                                     </span>
                                     </div>
@@ -285,5 +298,5 @@ const findNeighbours = (index: number): number[] => {
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </BasicLayout>
 </template>
