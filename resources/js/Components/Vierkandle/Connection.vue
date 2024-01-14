@@ -3,8 +3,6 @@ const props = defineProps<{
     start: DOMRect,
     end: DOMRect,
 }>()
-
-console.log(props.start, props.end);
 </script>
 
 <template>

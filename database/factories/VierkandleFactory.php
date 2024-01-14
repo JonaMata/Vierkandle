@@ -68,13 +68,13 @@ class VierkandleFactory extends Factory
         $wordsResult = $wordsTrie->search($word);
         $bonusResult = $bonusTrie->search($word);
 
-        if ($wordsResult == Trie::FOUND_NONE && $bonusResult == Trie::FOUND_NONE) {
+        if ($bonusResult == Trie::FOUND_NONE) {
             return $solutions;
         }
 
-        if (($wordsResult == Trie::FOUND_WORD || $bonusResult == Trie::FOUND_WORD) && !in_array($word, $found)) {
+        if (($bonusResult == Trie::FOUND_WORD) && !in_array($word, $found)) {
             $found[] = $word;
-            $solutions[] = ['word' => $word, 'chain' => implode(',', $chain), 'bonus' => $bonusResult == Trie::FOUND_WORD];
+            $solutions[] = ['word' => $word, 'chain' => implode(',', $chain), 'bonus' => $wordsResult != Trie::FOUND_WORD];
         }
         foreach ($this->findNeighbours($letters, end($chain)) as $neighbour) {
             if (!in_array($neighbour, $chain)) {

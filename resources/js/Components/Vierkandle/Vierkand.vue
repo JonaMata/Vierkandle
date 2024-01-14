@@ -10,7 +10,7 @@ defineProps<{
 </script>
 
 <template>
-<div class="vierkand">
+<div class="vierkand" :class="(start == 0 && includes == 0) ? 'used' : ''">
     <div class="letter">
         {{ letter }}
     </div>
@@ -27,10 +27,14 @@ defineProps<{
 <style scoped>
 .vierkand {
     position: relative;
-    width: 100px;
-    height: 100px;
-    background: gray;
+    width: min(20svw, 10svh);
+    height: min(20svw, 10svh);
+    background: lightgray;
     border-radius: 10px;
+}
+
+.used {
+    opacity: .3;
 }
 
 .letter {
@@ -38,7 +42,7 @@ defineProps<{
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 400%
+    font-size: 300%
 }
 
 .start {
@@ -46,14 +50,14 @@ defineProps<{
     left: 10%;
     bottom: 2%;
     color: red;
-    font-size: 100%;
+    font-size: 90%;
 }
 
 .includes {
     position: absolute;
     right: 10%;
     bottom: 2%;
-    font-size: 100%;
+    font-size: 90%;
 }
 
 .selected {
