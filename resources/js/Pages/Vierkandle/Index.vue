@@ -227,7 +227,7 @@ const findNeighbours = (index: number): number[] => {
                     <div
                         class="m-5 grid grid-cols-1 md:grid-cols-3 items-start content-start h-[80svh] max-h-[80svh] overflow-scroll md:overflow-hidden">
                         <div class="mx-auto md:mx-0 md:max-h-[80svh] md:overflow-y-auto">
-                            <div class="mb-2" v-if="true || amountGuessed/totalWords >= .6">
+                            <div class="mb-2" v-if="amountGuessed/totalWords >= .6">
                                 <h1 class="text-2xl font-bold mb-2">Hints:</h1>
                                 <label class="flex items-center">
                                     <Checkbox v-model:checked="hintMissing" name="hint-missing"/>
