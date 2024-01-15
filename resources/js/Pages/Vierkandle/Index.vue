@@ -305,6 +305,7 @@ const findNeighbours = (index: number): number[] => {
                                               class="transition-transform duration-500"
                                               :style="`transform: rotate(-${rotation*90}deg)`"
                                               ref="letterElements"
+                                              :active="chain.includes(i)"
                                               :letter="letter.letter"
                                               :start="letter.start"
                                               :includes="letter.includes"

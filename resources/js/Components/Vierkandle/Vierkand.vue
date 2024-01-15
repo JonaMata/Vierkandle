@@ -1,5 +1,6 @@
 <script setup lang="ts">
 defineProps<{
+    active?: boolean,
     letter: string,
     start: number,
     includes: number,
@@ -10,7 +11,8 @@ defineProps<{
 </script>
 
 <template>
-<div class="relative bg-gray-300 dark:bg-gray-900 rounded-lg vierkand" :class="(start == 0 && includes == 0) ? 'used' : ''">
+<div class="relative rounded-lg vierkand transition-all"
+     :class="`${(start == 0 && includes == 0) ? 'used' : ''} ${active ? 'shadow-2xl border-4 border-red-500 bg-white' : 'bg-gray-300 dark:bg-gray-900'}`">
     <div class="letter">
         {{ letter }}
     </div>
