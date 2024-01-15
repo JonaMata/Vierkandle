@@ -61,7 +61,7 @@ const letters = computed(() => {
     }
     for (const subSolutions of Object.values(solutions.value)) {
         for (const solution of Object.values(subSolutions)) {
-            if (solution.guessed) {
+            if (solution.guessed || solution.bonus) {
                 continue;
             }
             const chain: number[] = [...solution.chain];
@@ -226,8 +226,8 @@ const findNeighbours = (index: number): number[] => {
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[85svh] max-h-[85svh]">
                     <div
                         class="m-5 grid grid-cols-1 md:grid-cols-3 items-start content-start h-[80svh] max-h-[80svh] overflow-scroll md:overflow-hidden">
-                        <div class="mx-auto md:mx-0 md:max-h-[80svh] md:overflow-scroll">
-                            <div class="mb-2" v-if="amountGuessed/totalWords >= .6">
+                        <div class="mx-auto md:mx-0 md:max-h-[80svh] md:overflow-y-auto">
+                            <div class="mb-2" v-if="true || amountGuessed/totalWords >= .6">
                                 <h1 class="text-2xl font-bold mb-2">Hints:</h1>
                                 <label class="flex items-center">
                                     <Checkbox v-model:checked="hintMissing" name="hint-missing"/>
@@ -262,7 +262,7 @@ const findNeighbours = (index: number): number[] => {
                                     </template>
                                 </div>
                                 <span
-                                    v-if="Object.values(subSolutions).filter((data) => data.guessed == false).length > 0"
+                                    v-if="!hintLetters && !hintMissing && Object.values(subSolutions).filter((data) => data.guessed == false).length > 0"
                                     class="text-gray-600 dark:text-gray-400 italic">
                                     +{{ Object.values(subSolutions).filter((data) => data.guessed == false).length }} woorden te gaan
                                 </span>
