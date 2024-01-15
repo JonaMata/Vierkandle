@@ -20,7 +20,7 @@ defineProps<{
     <div v-if="showIncludes" class="includes font-semibold text-gray-500">
         {{ includes }}
     </div>
-    <div v-if="isStart" class="selected"></div>
+<!--    <div v-if="isStart" class="selected"></div>-->
 </div>
 </template>
 

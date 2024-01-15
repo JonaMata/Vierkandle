@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Vierkand from "@/Components/Vierkandle/Vierkand.vue";
-import {computed, onMounted, ref} from "vue";
+import {computed, nextTick, onMounted, ref, watch} from "vue";
 import Connection from "@/Components/Vierkandle/Connection.vue";
 import Checkbox from "@/Components/Checkbox.vue";
 import InputLabel from "@/Components/InputLabel.vue";
@@ -16,6 +16,7 @@ const solutions = ref<{ [Key: number]: { [Key: string]: { bonus: boolean, guesse
 const useLocalStorage = !!localStorage;
 
 onMounted(() => {
+    document.addEventListener('scroll', reRenderLines);
     const guessedWords: string[] = []
     if (useLocalStorage) {
         const guessedWordsString = localStorage.getItem('vierkandle_' + props.vierkandle.id);
@@ -91,8 +92,17 @@ const hintLetters = ref(false);
 const resultMessage = ref('');
 const showResult = ref(false);
 const rotation = ref(0);
+const renderLines = ref(true);
 
 const letterElements = ref([]);
+
+const reRenderLines = async () => {
+    renderLines.value = false;
+    await nextTick();
+    setTimeout(() => renderLines.value = true, 510);
+}
+
+watch(rotation, reRenderLines);
 
 const guessWord = () => {
     const word = input.value;
@@ -198,12 +208,15 @@ const findNeighbours = (index: number): number[] => {
 <template>
     <BasicLayout :title="$page.url == '/' ? 'Vandaag' : vierkandle.date">
         <template #header>
-            <div class="flex items-baseline gap-2"><h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <div class="flex items-baseline gap-2"><h2
+                class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Vierkandle
             </h2>
-            <h3 class="text-sm text-gray-500 dark:text-gray-400">
-                door <a href="https://github.com/JonaMata" target="_blank" class="underline transition cursor-pointer hover:text-gray-400 dark:hover:text-gray-500">Jonathan Matarazzi</a>
-            </h3></div>
+                <h3 class="text-sm text-gray-500 dark:text-gray-400">
+                    door <a href="https://github.com/JonaMata" target="_blank"
+                            class="underline transition cursor-pointer hover:text-gray-400 dark:hover:text-gray-500">Jonathan
+                    Matarazzi</a>
+                </h3></div>
         </template>
 
         <div class="py-4 dark:text-white" @click="() => inputField?.focus()">
@@ -258,8 +271,13 @@ const findNeighbours = (index: number): number[] => {
                         <div class="order-first md:order-none md:col-span-2 flex flex-col items-center">
                             <div class="w-fit">
                                 <h1 class="text-4xl text-center font-bold mb-2">{{ amountGuessed }}/{{ totalWords }}
-                                    woorden <div @click="() => rotation += 1" class="cursor-pointer inline-block -scale-x-100">🔄</div></h1>
-                                <div class="w-full h-7 rounded overflow-hidden border border-black dark:border-white mb-2 relative">
+                                    woorden
+                                    <div @click="() => rotation += 1" class="cursor-pointer inline-block -scale-x-100">
+                                        🔄
+                                    </div>
+                                </h1>
+                                <div
+                                    class="w-full h-7 rounded overflow-hidden border border-black dark:border-white mb-2 relative">
                                     <div class="absolute h-full bg-red-500 transition-all"
                                          :style="`width: ${amountGuessed/totalWords*100}%`"></div>
                                     <div class="absolute transition-all"
@@ -281,7 +299,8 @@ const findNeighbours = (index: number): number[] => {
                                     </span>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500" :style="`transform: rotate(${rotation*90}deg)`">
+                                <div class="grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500"
+                                     :style="`transform: rotate(${rotation*90}deg)`">
                                     <Vierkand v-for="(letter, i) in letters"
                                               class="transition-transform duration-500"
                                               :style="`transform: rotate(-${rotation*90}deg)`"
@@ -296,9 +315,15 @@ const findNeighbours = (index: number): number[] => {
                                 </div>
                             </div>
                         </div>
-                        <Connection v-if="chain.length > 1" v-for="n in chain.length-1"
-                                    :start="letterElements[chain[n-1]].$el.getBoundingClientRect()"
-                                    :end="letterElements[chain[n]].$el.getBoundingClientRect()"/>
+                        <div class="opacity-50">
+                            <div v-if="chain.length > 0 && renderLines" class="fixed rounded-full w-14 h-14"
+                                 style="background: red; transform: translate(-50%, -50%);"
+                                 :style="`left: ${letterElements[chain[0]].$el.getBoundingClientRect().x+letterElements[chain[0]].$el.getBoundingClientRect().width/2}px; top: ${letterElements[chain[0]].$el.getBoundingClientRect().y+letterElements[chain[0]].$el.getBoundingClientRect().height/2}px`">
+                            </div>
+                            <Connection v-if="chain.length > 1 && renderLines" v-for="n in chain.length-1"
+                                        :start="letterElements[chain[n-1]].$el.getBoundingClientRect()"
+                                        :end="letterElements[chain[n]].$el.getBoundingClientRect()"/>
+                        </div>
                     </div>
                 </div>
             </div>
