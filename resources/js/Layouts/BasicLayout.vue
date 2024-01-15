@@ -59,7 +59,7 @@ onUnmounted(() => {
                     <NavLink :active="route('list').endsWith($page.url)" :href="route('list')">Alle Vierkandles</NavLink>
                 </div>
                 <div class="text-gray-800 dark:text-gray-200">
-                    Theme: <select v-model="theme" @input="switchTheme" style="background-color: transparent;" class="appearance-none w-30 border-0 border-b-2 border-gray-200 focus:border-gray-200 dark:border-gray-600 dark:focus:border-gray-600 py-3 px-4 pr-8 leading-tight focus:outline-none focus:ring-0">
+                    Thema: <select v-model="theme" @input="switchTheme" style="background-color: transparent;" class="appearance-none w-30 border-0 border-b-2 border-gray-200 focus:border-gray-200 dark:border-gray-600 dark:focus:border-gray-600 py-3 px-4 pr-8 leading-tight focus:outline-none focus:ring-0">
                         <option value="auto">Auto</option>
                         <option value="dark">Dark</option>
                         <option value="light">Light</option>

@@ -90,6 +90,7 @@ const hintMissing = ref(false);
 const hintLetters = ref(false);
 const resultMessage = ref('');
 const showResult = ref(false);
+const rotation = ref(0);
 
 const letterElements = ref([]);
 
@@ -102,7 +103,7 @@ const guessWord = () => {
     if (word.length >= 4) {
         if (777 in solutions.value && word in solutions.value[777]) {
             length = 777;
-            message += 'Bonus word: ';
+            message += 'Bonuswoord: ';
         }
         if (length in solutions.value && word in solutions.value[length]) {
             if (!solutions.value[length][word].guessed) {
@@ -133,35 +134,35 @@ const guessWord = () => {
 const handleInput = () => {
     showResult.value = false;
     resultMessage.value = '';
+    input.value = input.value.replace(/[^a-z]/gi, '');
     input.value = input.value.toUpperCase();
     if (input.value.length == 0) {
         chain.value = [];
         return;
     }
     const newChain = findChain(input.value);
-    if (!newChain) {
-        input.value = input.value.substring(0, input.value.length - 1);
-    } else {
-        chain.value = newChain;
-    }
+    input.value = newChain.map((index) => props.vierkandle.letters[index]).join('');
+    chain.value = newChain;
 }
 
-const findChain = (word: string): false | number[] => {
+const findChain = (word: string): number[] => {
     const letter = word[0];
     const starts = [...props.vierkandle.letters.matchAll(new RegExp(letter, 'g'))];
+    let longestChain: number[] = [];
     for (const start of starts) {
         if (word.length === 1) {
             return [start.index];
         }
         const chain = recFindChain([start.index], word.substring(1));
-        if (chain) {
-            return chain;
+        if (chain.length > longestChain.length) {
+            longestChain = chain;
         }
     }
-    return false;
+    return longestChain;
 }
 
-const recFindChain = (chain: number[], word: string): false | number[] => {
+const recFindChain = (chain: number[], word: string): number[] => {
+    let longestChain: number[] = chain;
     for (const neighbour of findNeighbours(chain[chain.length - 1])) {
         if (props.vierkandle.letters[neighbour] === word[0] && !chain.includes(neighbour)) {
             const newChain = [...chain, neighbour];
@@ -169,12 +170,12 @@ const recFindChain = (chain: number[], word: string): false | number[] => {
                 return newChain;
             }
             const result = recFindChain(newChain, word.substring(1));
-            if (result) {
-                return result;
+            if (result.length > longestChain.length) {
+                longestChain = result;
             }
         }
     }
-    return false;
+    return longestChain;
 }
 
 const findNeighbours = (index: number): number[] => {
@@ -195,7 +196,7 @@ const findNeighbours = (index: number): number[] => {
 </script>
 
 <template>
-    <BasicLayout title="Vierkandle">
+    <BasicLayout :title="$page.url == '/' ? 'Vandaag' : vierkandle.date">
         <template #header>
             <div class="flex items-baseline gap-2"><h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Vierkandle
@@ -218,18 +219,18 @@ const findNeighbours = (index: number): number[] => {
                                 <label class="flex items-center">
                                     <Checkbox v-model:checked="hintMissing" name="hint-missing"/>
                                     <span
-                                        class="ms-2 text-sm text-gray-600 dark:text-gray-400">Show missing words</span>
+                                        class="ms-2 text-sm text-gray-600 dark:text-gray-400">Laat missende woorden zien.</span>
                                 </label>
                                 <label class="flex items-center">
                                     <Checkbox v-model:checked="hintLetters" name="hint-letters"/>
                                     <span
-                                        class="ms-2 text-sm text-gray-600 dark:text-gray-400">Reveal some letters</span>
+                                        class="ms-2 text-sm text-gray-600 dark:text-gray-400">Toon sommige letters.</span>
                                 </label>
                             </div>
                             <div class="mb-4" v-for="(subSolutions, num) in solutions">
                                 <h1 class="text-2xl font-bold mb-2">
                                     <template v-if="num == 777">
-                                        Bonus woorden:
+                                        Bonuswoorden:
                                     </template>
                                     <template v-else>
                                         {{ num }} letter woorden:
@@ -257,8 +258,8 @@ const findNeighbours = (index: number): number[] => {
                         <div class="order-first md:order-none md:col-span-2 flex flex-col items-center">
                             <div class="w-fit">
                                 <h1 class="text-4xl text-center font-bold mb-2">{{ amountGuessed }}/{{ totalWords }}
-                                    woorden</h1>
-                                <div class="w-full h-7 rounded overflow-hidden border border-black mb-2 relative">
+                                    woorden <div @click="() => rotation += 1" class="cursor-pointer inline-block -scale-x-100">🔄</div></h1>
+                                <div class="w-full h-7 rounded overflow-hidden border border-black dark:border-white mb-2 relative">
                                     <div class="absolute h-full bg-red-500 transition-all"
                                          :style="`width: ${amountGuessed/totalWords*100}%`"></div>
                                     <div class="absolute transition-all"
@@ -280,14 +281,16 @@ const findNeighbours = (index: number): number[] => {
                                     </span>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-4 grid-rows-4 gap-2 w-fit">
+                                <div class="grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500" :style="`transform: rotate(${rotation*90}deg)`">
                                     <Vierkand v-for="(letter, i) in letters"
+                                              class="transition-transform duration-500"
+                                              :style="`transform: rotate(-${rotation*90}deg)`"
                                               ref="letterElements"
                                               :letter="letter.letter"
                                               :start="letter.start"
                                               :includes="letter.includes"
-                                              :show-start="amountGuessed/totalWords >= .2 && letter.start+letter.includes > 0"
-                                              :show-includes="amountGuessed/totalWords >= .4 && letter.start+letter.includes > 0"
+                                              :show-start="amountGuessed/totalWords >= .2 && letter.start > 0"
+                                              :show-includes="amountGuessed/totalWords >= .4 && letter.includes > 0"
                                               :is-start="chain.length > 0 && chain[0] == i"
                                     />
                                 </div>

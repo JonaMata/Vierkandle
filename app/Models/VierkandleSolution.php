@@ -10,6 +10,10 @@ class VierkandleSolution extends Model
 {
 
     protected $fillable = ['word', 'chain', 'bonus'];
+
+    protected $casts = [
+        'bonus' => 'boolean',
+    ];
     public function vierkandle() : BelongsTo
     {
         return $this->belongsTo(Vierkandle::class);

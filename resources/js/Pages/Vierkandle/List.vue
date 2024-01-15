@@ -15,7 +15,7 @@ const props = defineProps<{
 </script>
 
 <template>
-    <BasicLayout title="Vierkandle">
+    <BasicLayout title="Alle">
         <template #header>
             <div class="flex items-baseline gap-2"><h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Vierkandle

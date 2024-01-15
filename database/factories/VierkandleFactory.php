@@ -26,7 +26,17 @@ class VierkandleFactory extends Factory
     }
     public function definition()
     {
-        $letters = $this->generateBoard(4);
+        $found = false;
+        $tries = 0;
+        while (!$found) {
+            $tries++;
+            \Laravel\Prompts\info('Try '.$tries.'...');
+            $letters = $this->generateBoard(4);
+            $solutions = $this->findSolutions($letters);
+            $longestWord = collect($solutions)->max(fn($solution) => strlen($solution['word']));
+            $usedLetters = collect($solutions)->map(fn($solution) => explode(',', $solution['chain']))->flatten()->unique()->count();
+            $found = $longestWord >= 10 && $usedLetters >= 16;
+        }
         return [
             'letters' => $letters,
             'date' => Carbon::tomorrow(),
@@ -40,7 +50,7 @@ class VierkandleFactory extends Factory
         shuffle($usedLetters);
         $letters = implode($usedLetters);
         for ($x = 0; $x < $size; $x++) {
-            print substr($letters, $x*$size, $size)."\n";
+//            print substr($letters, $x*$size, $size)."\n";
         }
         return $letters;
     }
@@ -72,7 +82,7 @@ class VierkandleFactory extends Factory
             return $solutions;
         }
 
-        if (($bonusResult == Trie::FOUND_WORD) && !in_array($word, $found)) {
+        if ($bonusResult == Trie::FOUND_WORD && !in_array($word, $found)) {
             $found[] = $word;
             $solutions[] = ['word' => $word, 'chain' => implode(',', $chain), 'bonus' => $wordsResult != Trie::FOUND_WORD];
         }
