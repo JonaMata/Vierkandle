@@ -12,7 +12,7 @@ defineProps<{
 
 <template>
 <div class="relative rounded-lg vierkand transition-all"
-     :class="`${(start == 0 && includes == 0) ? 'used' : ''} ${active ? 'shadow-2xl border-4 border-red-500 bg-white' : 'bg-gray-300 dark:bg-gray-900'}`">
+     :class="`${(start == 0 && includes == 0) ? 'used' : ''} ${active ? 'shadow-2xl border-4 border-red-500 bg-transparent' : 'bg-gray-300 dark:bg-gray-900'}`">
     <div class="letter">
         {{ letter }}
     </div>
