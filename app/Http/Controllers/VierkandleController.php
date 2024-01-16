@@ -26,7 +26,7 @@ class VierkandleController extends Controller
     public function list()
     {
         return Inertia::render('Vierkandle/List', [
-            'today' => Vierkandle::query()->where('date', Carbon::today())->first()->setAppends(['solutions']),
+            'today' => Vierkandle::query()->where('date', Carbon::today())->first(),
             'vierkandles' => Vierkandle::query()->where('date', '!=', Carbon::today())->orderBy('date', 'desc')->get(),
         ]);
     }

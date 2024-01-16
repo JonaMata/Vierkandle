@@ -7,6 +7,7 @@ import Checkbox from "@/Components/Checkbox.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
 import NavLink from "@/Components/NavLink.vue";
+import VierkandlePreview from "@/Components/Vierkandle/VierkandlePreview.vue";
 
 const props = defineProps<{
     today: {},
@@ -30,23 +31,9 @@ const props = defineProps<{
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl p-5 sm:rounded-lg h-[85svh] max-h-[85svh]">
                     <h1 class="text-2xl font-bold">Alle Vierkandles:</h1>
                     <div class="flex flex-wrap gap-5">
-                        <a class="hover:opacity-70" :href="route('index')">
-                        <div class="flex flex-col items-center rounded-lg px-2 pb-2 bg-gray-200 dark:bg-gray-600">
-                            <div>Vandaag</div>
-                            <div class="grid grid-cols-4 grid-rows-4 gap-1">
-                                <div v-for="letter in today.letters" class="w-5 h-5 rounded bg-gray-300 dark:bg-gray-700 align-middle text-center">{{ letter }}</div>
-                            </div>
-                        </div>
-                        </a>
+                        <VierkandlePreview :vierkandle="today" title="Vandaag" route-name="index" />
 
-                        <a class="hover:opacity-70" v-for="vierkandle in vierkandles" :href="route('show', {vierkandle: vierkandle})">
-                            <div class="flex flex-col items-center rounded-lg px-2 pb-2 bg-gray-200 dark:bg-gray-600">
-                                <div>{{ vierkandle.date }}</div>
-                                <div class="grid grid-cols-4 grid-rows-4 gap-1">
-                                    <div v-for="letter in vierkandle.letters" class="w-5 h-5 rounded bg-gray-300 dark:bg-gray-700 align-middle text-center">{{ letter }}</div>
-                                </div>
-                            </div>
-                        </a>
+                        <VierkandlePreview v-for="vierkandle in vierkandles" :vierkandle="vierkandle" />
                     </div>
                 </div>
             </div>

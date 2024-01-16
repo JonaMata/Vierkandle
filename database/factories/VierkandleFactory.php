@@ -33,9 +33,10 @@ class VierkandleFactory extends Factory
             \Laravel\Prompts\info('Try '.$tries.'...');
             $letters = $this->generateBoard(4);
             $solutions = $this->findSolutions($letters);
-            $longestWord = collect($solutions)->max(fn($solution) => strlen($solution['word']));
-            $usedLetters = collect($solutions)->map(fn($solution) => explode(',', $solution['chain']))->flatten()->unique()->count();
-            $found = $longestWord >= 10 && $usedLetters >= 16;
+            $longestWord = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->max(fn($solution) => strlen($solution['word']));
+            $usedLetters = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->map(fn($solution) => explode(',', $solution['chain']))->flatten()->unique()->count();
+            $mandatoryWords = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->count();
+            $found = $longestWord >= 8 && $usedLetters >= 16 && $mandatoryWords <= 100;
         }
         return [
             'letters' => $letters,

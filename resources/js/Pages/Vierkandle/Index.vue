@@ -14,6 +14,8 @@ const props = defineProps<{
 
 const solutions = ref<{ [Key: number]: { [Key: string]: { bonus: boolean, guessed: boolean, chain: number[] } } }>({});
 const useLocalStorage = !!localStorage;
+let moveEventListener = null;
+let endEventListener = null;
 
 onMounted(() => {
     document.addEventListener('scroll', reRenderLines);
@@ -120,8 +122,10 @@ const guessWord = () => {
                 solutions.value[length][word].guessed = true;
                 if (useLocalStorage) {
                     const guessedWords: string[] = JSON.parse(localStorage.getItem('vierkandle_' + props.vierkandle.id) ?? '[]');
-                    guessedWords.push(word);
-                    localStorage.setItem('vierkandle_' + props.vierkandle.id, JSON.stringify(guessedWords));
+                    if (!guessedWords.includes(word)) {
+                        guessedWords.push(word);
+                        localStorage.setItem('vierkandle_' + props.vierkandle.id, JSON.stringify(guessedWords));
+                    }
                 }
                 if (!message) {
                     message += 'Goed geraden: ';
@@ -202,6 +206,53 @@ const findNeighbours = (index: number): number[] => {
         }
     }
     return neighbours;
+}
+
+const dragStart = (e: MouseEvent | TouchEvent) => {
+    resultMessage.value = '';
+    const index = letterElements.value.findIndex((element) => element.$el == e.target || element.$el.contains(e.target));
+    if (index >= 0) {
+        chain.value = [index];
+    }
+    if (e instanceof MouseEvent) {
+        window.addEventListener('mousemove', dragMove);
+        window.addEventListener('mouseup', dragEnd);
+    } else {
+        window.addEventListener('touchmove', dragMove);
+        window.addEventListener('touchend', dragEnd);
+    }
+    chainToInput()
+}
+
+const dragMove = (e: MouseEvent | TouchEvent) => {
+    const index = letterElements.value.findIndex((element) => element.$el == e.target);
+    if (index >= 0) {
+        if (chain.value.length > 0) {
+            const neighbours = findNeighbours(chain.value[chain.value.length - 1]);
+            if (neighbours.includes(index)) {
+                if (!chain.value.includes(index)) {
+                    chain.value.push(index);
+                } else if (chain.value[chain.value.length - 2] == index) {
+                    chain.value.pop();
+                }
+            }
+        } else {
+            chain.value = [index];
+        }
+    }
+    chainToInput()
+}
+
+const dragEnd = (e: MouseEvent | TouchEvent) => {
+    window.removeEventListener('mousemove', dragMove);
+    window.removeEventListener('touchmove', dragEnd);
+    window.removeEventListener('mouseup', dragMove);
+    window.removeEventListener('touchend', dragEnd);
+    guessWord();
+}
+
+const chainToInput = () => {
+    input.value = chain.value.map((index) => props.vierkandle.letters[index]).join('');
 }
 </script>
 
@@ -299,10 +350,12 @@ const findNeighbours = (index: number): number[] => {
                                     </span>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500"
+                                <div class="grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500 select-none"
                                      :style="`transform: rotate(${rotation*90}deg)`">
                                     <Vierkand v-for="(letter, i) in letters"
                                               class="transition-transform duration-500"
+                                              @mousedown="dragStart"
+                                              @touchstart="dragStart"
                                               :style="`transform: rotate(-${rotation*90}deg)`"
                                               ref="letterElements"
                                               :active="chain.includes(i)"
@@ -316,7 +369,7 @@ const findNeighbours = (index: number): number[] => {
                                 </div>
                             </div>
                         </div>
-                        <div class="opacity-50">
+                        <div class="opacity-50 pointer-events-none">
                             <div v-if="chain.length > 0 && renderLines" class="fixed rounded-full w-14 h-14"
                                  style="background: red; transform: translate(-50%, -50%);"
                                  :style="`left: ${letterElements[chain[0]].$el.getBoundingClientRect().x+letterElements[chain[0]].$el.getBoundingClientRect().width/2}px; top: ${letterElements[chain[0]].$el.getBoundingClientRect().y+letterElements[chain[0]].$el.getBoundingClientRect().height/2}px`">

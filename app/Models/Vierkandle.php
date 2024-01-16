@@ -11,6 +11,8 @@ class Vierkandle extends Model
 {
     use HasFactory;
 
+    protected $appends = ['solution_count'];
+
     public function solutions(): HasMany
     {
         return $this->hasMany(VierkandleSolution::class);
@@ -18,5 +20,9 @@ class Vierkandle extends Model
 
     public function getSolutionsAttribute(): Collection {
         return $this->solutions()->get();
+    }
+
+    public function getSolutionCountAttribute(): int {
+        return $this->solutions()->count();
     }
 }
