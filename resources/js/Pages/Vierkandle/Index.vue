@@ -4,9 +4,7 @@ import Vierkand from "@/Components/Vierkandle/Vierkand.vue";
 import {computed, nextTick, onMounted, ref, watch} from "vue";
 import Connection from "@/Components/Vierkandle/Connection.vue";
 import Checkbox from "@/Components/Checkbox.vue";
-import InputLabel from "@/Components/InputLabel.vue";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
-import NavLink from "@/Components/NavLink.vue";
 
 const props = defineProps<{
     vierkandle: { letters: string, solutions: Array<{ word: string, chain: string, bonus: boolean }> },
@@ -14,11 +12,12 @@ const props = defineProps<{
 
 const solutions = ref<{ [Key: number]: { [Key: string]: { bonus: boolean, guessed: boolean, chain: number[] } } }>({});
 const useLocalStorage = !!localStorage;
-let moveEventListener = null;
-let endEventListener = null;
 
 onMounted(() => {
-    document.addEventListener('scroll', reRenderLines);
+    window.addEventListener('scroll', reRenderLines);
+    window.addEventListener('keydown', () => {
+        inputField.value?.focus();
+    })
     const guessedWords: string[] = []
     if (useLocalStorage) {
         const guessedWordsString = localStorage.getItem('vierkandle_' + props.vierkandle.id);
@@ -51,7 +50,6 @@ onMounted(() => {
             {}
         );
     }
-    inputField.value?.focus();
 });
 
 
@@ -209,6 +207,7 @@ const findNeighbours = (index: number): number[] => {
 }
 
 const dragStart = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
     resultMessage.value = '';
     const index = letterElements.value.findIndex((element) => element.$el == e.target || element.$el.contains(e.target));
     if (index >= 0) {
@@ -218,14 +217,21 @@ const dragStart = (e: MouseEvent | TouchEvent) => {
         window.addEventListener('mousemove', dragMove);
         window.addEventListener('mouseup', dragEnd);
     } else {
-        window.addEventListener('touchmove', dragMove);
-        window.addEventListener('touchend', dragEnd);
+        window.addEventListener('touchmove', dragMove, {passive: false});
+        window.addEventListener('touchend', dragEnd, {passive: false});
     }
     chainToInput()
 }
 
 const dragMove = (e: MouseEvent | TouchEvent) => {
-    const index = letterElements.value.findIndex((element) => element.$el == e.target);
+    e.preventDefault();
+    let index =  -1;
+    if (e instanceof MouseEvent) {
+        index = letterElements.value.findIndex((element) => element.$el == e.target || element.$el.contains(e.target));
+    } else {
+        const touchEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+        index = letterElements.value.findIndex((element) => element.$el == touchEl || element.$el.contains(touchEl));
+    }
     if (index >= 0) {
         if (chain.value.length > 0) {
             const neighbours = findNeighbours(chain.value[chain.value.length - 1]);
@@ -245,8 +251,8 @@ const dragMove = (e: MouseEvent | TouchEvent) => {
 
 const dragEnd = (e: MouseEvent | TouchEvent) => {
     window.removeEventListener('mousemove', dragMove);
-    window.removeEventListener('touchmove', dragEnd);
-    window.removeEventListener('mouseup', dragMove);
+    window.removeEventListener('touchmove', dragMove);
+    window.removeEventListener('mouseup', dragEnd);
     window.removeEventListener('touchend', dragEnd);
     guessWord();
 }
@@ -270,7 +276,7 @@ const chainToInput = () => {
                 </h3></div>
         </template>
 
-        <div class="py-4 dark:text-white" @click="() => inputField?.focus()">
+        <div class="py-4 dark:text-white">
             <input class="opacity-0 fixed top-full" v-model="input" ref="inputField" @input="handleInput"
                    @keydown.enter="guessWord"/>
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -319,7 +325,7 @@ const chainToInput = () => {
                                 </span>
                             </div>
                         </div>
-                        <div class="order-first md:order-none md:col-span-2 flex flex-col items-center">
+                        <div class="order-first mb-10 md:mb-0 md:order-none md:col-span-2 flex flex-col items-center">
                             <div class="w-fit">
                                 <h1 class="text-4xl text-center font-bold mb-2">{{ amountGuessed }}/{{ totalWords }}
                                     woorden
