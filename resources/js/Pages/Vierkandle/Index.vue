@@ -264,25 +264,14 @@ const chainToInput = () => {
 
 <template>
     <BasicLayout :title="$page.url == '/' ? 'Vandaag' : vierkandle.date">
-        <template #header>
-            <div class="flex items-baseline gap-2"><h2
-                class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                Vierkandle
-            </h2>
-                <h3 class="text-sm text-gray-500 dark:text-gray-400">
-                    door <a href="https://github.com/JonaMata" target="_blank"
-                            class="underline transition cursor-pointer hover:text-gray-400 dark:hover:text-gray-500">Jonathan
-                    Matarazzi</a>
-                </h3></div>
-        </template>
 
         <div class="py-4 dark:text-white">
             <input class="opacity-0 fixed top-full" v-model="input" ref="inputField" @input="handleInput"
                    @keydown.enter="guessWord"/>
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[85svh] max-h-[85svh]">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[77svh] max-h-[77svh] md:h-[85svh] md:max-h-[85svh]">
                     <div
-                        class="m-5 grid grid-cols-1 md:grid-cols-3 items-start content-start h-[80svh] max-h-[80svh] overflow-scroll md:overflow-hidden">
+                        class="m-5 grid grid-cols-1 md:grid-cols-3 items-start content-start h[73svh] max-h-[73svh] md:h-[80svh] md:max-h-[80svh] overflow-scroll md:overflow-hidden">
                         <div class="mx-auto md:mx-0 md:max-h-[80svh] md:overflow-y-auto">
                             <div class="mb-2" v-if="amountGuessed/totalWords >= .6">
                                 <h1 class="text-2xl font-bold mb-2">Hints:</h1>

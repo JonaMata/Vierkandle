@@ -17,15 +17,6 @@ const props = defineProps<{
 
 <template>
     <BasicLayout title="Alle">
-        <template #header>
-            <div class="flex items-baseline gap-2"><h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                Vierkandle
-            </h2>
-            <h3 class="text-sm text-gray-500 dark:text-gray-400">
-                door <a href="https://github.com/JonaMata" target="_blank" class="underline transition cursor-pointer hover:text-gray-400 dark:hover:text-gray-500">Jonathan Matarazzi</a>
-            </h3></div>
-        </template>
-
         <div class="py-4 dark:text-white">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl p-5 sm:rounded-lg h-[85svh] max-h-[85svh]">

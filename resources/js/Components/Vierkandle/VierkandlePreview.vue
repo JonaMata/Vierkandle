@@ -19,7 +19,7 @@ const solutionsFound = JSON.parse(localStorage.getItem('vierkandle_'+props.vierk
             :class="solutionsFound == vierkandle.solution_count ? 'opacity-30' : ''">
             <div>{{ title ?? vierkandle.date }}</div>
             <div class="grid grid-cols-4 grid-rows-4 gap-1">
-                <div v-for="letter in vierkandle.letters" class="w-5 h-5 rounded bg-gray-300 dark:bg-gray-700 align-middle text-center">{{ letter }}</div>
+                <div v-for="letter in vierkandle.letters" class="w-4 h-4 text-xs rounded bg-gray-300 dark:bg-gray-700 align-middle text-center">{{ letter }}</div>
             </div>
             <div
                 class="w-full h-4 rounded overflow-hidden border border-black dark:border-white mt-2 relative">
