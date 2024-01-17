@@ -63,33 +63,31 @@ class VierkandleFactory extends Factory
      */
     function findSolutions(string $letters): array
     {
-        $wordsTrie = $this->loadWords(base_path() . '/resources/files/basis.txt', $letters);
-        $bonusTrie = $this->loadWords(base_path() . '/resources/files/bonus.txt', $letters);
+        $wordsTrie = $this->loadWords(base_path() . '/resources/files/wordlist.txt', $letters);
         $solutions = [];
         $found = [];
         for ($start = 0; $start < strlen($letters); $start++) {
-            $solutions = array_merge($solutions, $this->attempt([$start], $letters[$start], $letters, $wordsTrie, $bonusTrie, $found));
+            $solutions = array_merge($solutions, $this->attempt([$start], $letters[$start], $letters, $wordsTrie, $found));
         }
         return $solutions;
     }
 
-    function attempt(array $chain, string $word, string $letters, Trie $wordsTrie, Trie $bonusTrie, array & $found): array
+    function attempt(array $chain, string $word, string $letters, Trie $wordsTrie, array & $found): array
     {
         $solutions = [];
         $wordsResult = $wordsTrie->search($word);
-        $bonusResult = $bonusTrie->search($word);
 
-        if ($bonusResult == Trie::FOUND_NONE) {
+        if ($wordsResult == Trie::FOUND_NONE) {
             return $solutions;
         }
 
-        if ($bonusResult == Trie::FOUND_WORD && !in_array($word, $found)) {
+        if (($wordsResult == Trie::FOUND_WORD || $wordsResult == Trie::FOUND_BONUS_WORD) && !in_array($word, $found)) {
             $found[] = $word;
-            $solutions[] = ['word' => $word, 'chain' => implode(',', $chain), 'bonus' => $wordsResult != Trie::FOUND_WORD];
+            $solutions[] = ['word' => $word, 'chain' => implode(',', $chain), 'bonus' => $wordsResult == Trie::FOUND_BONUS_WORD];
         }
         foreach ($this->findNeighbours($letters, end($chain)) as $neighbour) {
             if (!in_array($neighbour, $chain)) {
-                $solutions = array_merge($solutions, $this->attempt(array_merge($chain, [$neighbour]), $word . str_split($letters)[$neighbour], $letters, $wordsTrie, $bonusTrie, $found));
+                $solutions = array_merge($solutions, $this->attempt(array_merge($chain, [$neighbour]), $word . str_split($letters)[$neighbour], $letters, $wordsTrie, $found));
             }
         }
 
@@ -121,9 +119,11 @@ class VierkandleFactory extends Factory
     {
         $newTrie = new Trie();
         foreach (file($path) as $word) {
-            $word = trim($word);
+            $splits = explode(',', trim($word));
+            $word = $splits[0];
+            $perc = $splits[1];
             if ($this->wordIsPossible($letters, $word)) {
-                $newTrie->insert($word);
+                $newTrie->insert($word, $perc<50);
             }
         }
         return $newTrie;

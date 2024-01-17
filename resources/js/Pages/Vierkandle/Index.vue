@@ -230,7 +230,7 @@ const dragMove = (e: MouseEvent | TouchEvent) => {
         index = letterElements.value.findIndex((element) => element.$el == e.target || element.$el.contains(e.target));
     } else {
         const touchEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-        index = letterElements.value.findIndex((element) => element.$el == touchEl || element.$el.contains(touchEl));
+        index = letterElements.value.findIndex((element) => element.$el.querySelector('.letter') == touchEl || element.$el.querySelector('.letter').contains(touchEl));
     }
     if (index >= 0) {
         if (chain.value.length > 0) {

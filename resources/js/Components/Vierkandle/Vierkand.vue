@@ -41,7 +41,10 @@ defineProps<{
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 300%
+    font-size: 300%;
+    line-height: 80%;
+    width: 50%;
+    text-align: center;
 }
 
 .start {

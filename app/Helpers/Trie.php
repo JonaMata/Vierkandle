@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 class Trie
 {
+    const FOUND_BONUS_WORD = 3;
     const FOUND_WORD = 2;
     const FOUND_PREFIX = 1;
     const FOUND_NONE = 0;
@@ -14,7 +15,7 @@ class Trie
         $this->root = new TrieNode("");
     }
 
-    public function insert(string $word): void
+    public function insert(string $word, bool $bonus): void
     {
         $node = $this->root;
 
@@ -30,6 +31,7 @@ class Trie
         }
 
         $node->end = true;
+        $node->bonus = $bonus;
     }
 
     public function search(string $word) : int
@@ -41,7 +43,7 @@ class Trie
             }
             $node = $node->children[$char];
         }
-        return $node->end ? self::FOUND_WORD : self::FOUND_PREFIX;
+        return $node->end ? ($node->bonus ? self::FOUND_BONUS_WORD : self::FOUND_WORD) : self::FOUND_PREFIX;
     }
 
 
