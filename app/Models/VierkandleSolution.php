@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class VierkandleSolution extends Model
 {
 
-    protected $fillable = ['word', 'chain', 'bonus'];
+    protected $fillable = ['word', 'url', 'chain', 'bonus'];
 
     protected $casts = [
         'bonus' => 'boolean',

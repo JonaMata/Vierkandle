@@ -7,10 +7,12 @@ import Checkbox from "@/Components/Checkbox.vue";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
 
 const props = defineProps<{
-    vierkandle: { letters: string, solutions: Array<{ word: string, chain: string, bonus: boolean }> },
+    vierkandle: { letters: string, solutions: Array<{ word: string, url: string, chain: string, bonus: boolean }> },
 }>()
 
-const solutions = ref<{ [Key: number]: { [Key: string]: { bonus: boolean, guessed: boolean, chain: number[] } } }>({});
+const solutions = ref<{
+    [Key: number]: { [Key: string]: { url: string, bonus: boolean, guessed: boolean, chain: number[] } }
+}>({});
 const useLocalStorage = !!localStorage;
 
 onMounted(() => {
@@ -36,6 +38,7 @@ onMounted(() => {
             solutions.value[length] = {};
         }
         solutions.value[length][solution.word] = {
+            url: solution.url,
             bonus: solution.bonus,
             guessed: guessedWords.includes(solution.word),
             chain: solution.chain.split(',').map((n) => parseInt(n))
@@ -93,6 +96,7 @@ const resultMessage = ref('');
 const showResult = ref(false);
 const rotation = ref(0);
 const renderLines = ref(true);
+const lastSolution = ref<{ word: string, url: string }>(null);
 
 const letterElements = ref([]);
 
@@ -129,6 +133,7 @@ const guessWord = () => {
                     message += 'Goed geraden: ';
                 }
                 message += word;
+                lastSolution.value = {word, url: solutions.value[length][word].url};
             } else {
                 message = 'Al geraden!';
             }
@@ -144,6 +149,7 @@ const guessWord = () => {
 }
 
 const handleInput = () => {
+    lastSolution.value = null;
     showResult.value = false;
     resultMessage.value = '';
     input.value = input.value.replace(/[^a-z]/gi, '');
@@ -225,7 +231,7 @@ const dragStart = (e: MouseEvent | TouchEvent) => {
 
 const dragMove = (e: MouseEvent | TouchEvent) => {
     e.preventDefault();
-    let index =  -1;
+    let index = -1;
     if (e instanceof MouseEvent) {
         index = letterElements.value.findIndex((element) => element.$el == e.target || element.$el.contains(e.target));
     } else {
@@ -269,7 +275,8 @@ const chainToInput = () => {
             <input class="opacity-0 fixed top-full" v-model="input" ref="inputField" @input="handleInput"
                    @keydown.enter="guessWord"/>
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[77svh] max-h-[77svh] md:h-[85svh] md:max-h-[85svh]">
+                <div
+                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[77svh] max-h-[77svh] md:h-[85svh] md:max-h-[85svh]">
                     <div
                         class="m-5 grid grid-cols-1 md:grid-cols-3 items-start content-start h[73svh] max-h-[73svh] md:h-[80svh] md:max-h-[80svh] overflow-scroll md:overflow-hidden">
                         <div class="mx-auto md:mx-0 md:max-h-[80svh] md:overflow-y-auto">
@@ -297,7 +304,15 @@ const chainToInput = () => {
                                 </h1>
                                 <div class="flex flex-wrap gap-2">
                                     <template v-for="(data, word) in subSolutions">
-                                        <div v-if="data.guessed">{{ word }}</div>
+                                        <div v-if="data.guessed">
+                                            <a v-if="data.url" :href="data.url" target="_blank"
+                                               class="border-b border-black dark:border-white border-dashed">
+                                                {{ word }}
+                                            </a>
+                                            <template v-else>
+                                                {{ word }}
+                                            </template>
+                                        </div>
                                         <div v-else-if="hintLetters" class="text-gray-400">{{
                                                 word.substring(0, Math.ceil(word.length / 6)) + '*'.repeat((word.length - Math.floor(word.length / 6)) - (Math.ceil(word.length / 6))) + word.substring(word.length - Math.floor(word.length / 6), word.length)
                                             }}
@@ -332,7 +347,7 @@ const chainToInput = () => {
                                         ⭐️
                                     </div>
                                 </div>
-                                <div class="flex">
+                                <div class="flex relative">
                                     <div class="flex-grow w-0 text-4xl font-bold mx-auto mb-2 text-center">
                                     <span
                                         class="opacity-0">X</span>
@@ -344,9 +359,15 @@ const chainToInput = () => {
                                         {{ input }}
                                     </span>
                                     </div>
+                                    <a v-if="lastSolution" :href="lastSolution.url" target="_blank"
+                                       :class="!showResult && lastSolution ? 'opacity-100 transition-opacity' : ''"
+                                       class="opacity-0 absolute text-xl hover:opacity-60 px-2 bg-gray-300 dark:bg-gray-900 border-black dark:border-white border rounded-md left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                                            {{ lastSolution.word }}
+                                    </a>
                                 </div>
-                                <div class="grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500 select-none"
-                                     :style="`transform: rotate(${rotation*90}deg)`">
+                                <div
+                                    class="grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500 select-none"
+                                    :style="`transform: rotate(${rotation*90}deg)`">
                                     <Vierkand v-for="(letter, i) in letters"
                                               class="transition-transform duration-500"
                                               @mousedown="dragStart"

@@ -7,6 +7,7 @@ use App\Models\Vierkandle;
 use App\Models\VierkandleSolution;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Http;
 
 class VierkandleFactory extends Factory
 {
@@ -15,12 +16,12 @@ class VierkandleFactory extends Factory
     {
         return $this->afterCreating(function (Vierkandle $vierkandle) {
             $solutions = $this->findSolutions($vierkandle->letters);
+            $client = new \GuzzleHttp\Client(['base_uri' => 'https://nl.wiktionary.org', 'allow_redirects' => false]);
             foreach ($solutions as $solution) {
-                $vierkandle->solutions()->create([
-                    'word' => $solution['word'],
-                    'chain' => $solution['chain'],
-                    'bonus' => $solution['bonus'],
-                ]);
+                $url = 'w/index.php?search='.strtolower($solution['word']).'&ns0=1';
+                $response = $client->request('GET', $url);
+                $solution['url'] = $response->getStatusCode() == 302 ? $response->getHeader('location')[0] : null;
+                $vierkandle->solutions()->create($solution);
             }
         });
     }
@@ -123,7 +124,7 @@ class VierkandleFactory extends Factory
             $word = $splits[0];
             $perc = $splits[1];
             if ($this->wordIsPossible($letters, $word)) {
-                $newTrie->insert($word, $perc<50);
+                $newTrie->insert($word, $perc<70);
             }
         }
         return $newTrie;
