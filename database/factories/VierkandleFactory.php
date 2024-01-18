@@ -6,6 +6,7 @@ use App\Helpers\Trie;
 use App\Models\Vierkandle;
 use App\Models\VierkandleSolution;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Http;
 
@@ -16,8 +17,28 @@ class VierkandleFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Vierkandle $vierkandle) {
-            $solutions = $this->findSolutions($vierkandle->letters);
-            $client = new \GuzzleHttp\Client(['base_uri' => 'https://nl.wiktionary.org', 'allow_redirects' => false]);
+            $boardsize = $vierkandle->boardsize;
+            $found = false;
+            $tries = 0;
+            $solutions = [];
+            $letters = [];
+            while (!$found) {
+                $tries++;
+                \Laravel\Prompts\info('Try ' . $tries . '...');
+                $letters = $this->generateBoard($boardsize);
+                $solutions = $this->findSolutions($letters);
+                $longestWord = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->max(fn($solution) => strlen($solution['word']));
+                $usedLetters = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->map(fn($solution) => $solution['chain'])->flatten()->unique()->count();
+                $mandatoryWords = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->count();
+                print "longest word $longestWord >= " . $boardsize * 2 . ' ' . ($longestWord >= $boardsize * 2 ? '✔' : '✘') . " \n";
+                print "used letters $usedLetters >= " . $boardsize ** 2 . ' ' . ($usedLetters >= $boardsize ** 2  ? '✔' : '✘') . " \n";
+                print "total words $mandatoryWords <= " . $boardsize * 10 . ' ' . ($mandatoryWords <= $boardsize * 15 ? '✔' : '✘ ') . " \n\n";
+                $found = $longestWord >= $boardsize * 2 && $usedLetters >= $boardsize ** 2 && $mandatoryWords <= $boardsize * 15 ;
+            }
+            $vierkandle->letters = $letters;
+            $vierkandle->save();
+
+            $client = new Client(['base_uri' => 'https://nl.wiktionary.org', 'allow_redirects' => false]);
             foreach ($solutions as $solution) {
                 $url = 'w/index.php?search=' . strtolower($solution['word']) . '&ns0=1';
                 $response = $client->request('GET', $url);
@@ -32,20 +53,9 @@ class VierkandleFactory extends Factory
 
     public function definition()
     {
-        $found = false;
-        $tries = 0;
-        while (!$found) {
-            $tries++;
-            \Laravel\Prompts\info('Try ' . $tries . '...');
-            $letters = $this->generateBoard(4);
-            $solutions = $this->findSolutions($letters);
-            $longestWord = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->max(fn($solution) => strlen($solution['word']));
-            $usedLetters = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->map(fn($solution) => $solution['chain'])->flatten()->unique()->count();
-            $mandatoryWords = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->count();
-            $found = $longestWord >= 8 && $usedLetters >= 16 && $mandatoryWords <= 100;
-        }
         return [
-            'letters' => $letters,
+            'letters' => "",
+            'boardsize' => 4,
             'date' => Carbon::tomorrow(),
         ];
     }
@@ -62,9 +72,9 @@ class VierkandleFactory extends Factory
         $usedLetters = array_map(fn($key): string => $sampleSpace[$key], $keys);
         shuffle($usedLetters);
         $letters = implode($usedLetters);
-        for ($x = 0; $x < $size; $x++) {
+//        for ($x = 0; $x < $size; $x++) {
 //            print substr($letters, $x*$size, $size)."\n";
-        }
+//        }
         return $letters;
     }
 

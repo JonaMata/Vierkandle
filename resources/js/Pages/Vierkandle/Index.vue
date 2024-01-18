@@ -6,7 +6,6 @@ import Checkbox from "@/Components/Checkbox.vue";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
 import {usePage} from "@inertiajs/vue3";
 import {useVierkandleStorage} from "@/Composables/useVierkandleStorage";
-import axios from "axios";
 
 const props = defineProps<{
     vierkandle: App.Vierkandle,
@@ -50,7 +49,7 @@ onMounted(() => {
 
 const letters = computed(() => {
     const letters: { letter: string, start: number, includes: number }[] = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < props.vierkandle.boardsize ** 2; i++) {
         const letter = props.vierkandle.letters[i];
         letters.push({letter, start: 0, includes: 0});
     }
@@ -184,13 +183,13 @@ const recFindChain = (chain: number[], word: string): number[] => {
 
 const findNeighbours = (index: number): number[] => {
     const neighbours = [];
-    for (let i = -5; i <= 5; i++) {
+    for (let i = -(props.vierkandle.boardsize + 1); i <= props.vierkandle.boardsize + 1; i++) {
         if (i === 0) {
             continue;
         }
         const neighbour = index + i;
-        if (neighbour >= 0 && neighbour < 16) {
-            if (Math.abs(index % 4 - neighbour % 4) <= 1) {
+        if (neighbour >= 0 && neighbour < props.vierkandle.boardsize ** 2) {
+            if (Math.abs(index % props.vierkandle.boardsize - neighbour % props.vierkandle.boardsize) <= 1) {
                 neighbours.push(neighbour);
             }
         }
@@ -349,7 +348,7 @@ const chainToInput = () => {
                                     </a>
                                 </div>
                                 <div
-                                    class="mx-auto grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500 select-none"
+                                    class="mx-auto grid vierkandle-grid gap-2 w-fit transition-transform duration-500 select-none"
                                     :style="`transform: rotate(${rotation*90}deg)`">
                                     <Vierkand v-for="(letter, i) in letters"
                                               class="transition-transform duration-500"
@@ -383,3 +382,10 @@ const chainToInput = () => {
         </div>
     </BasicLayout>
 </template>
+
+<style scoped>
+.vierkandle-grid {
+    grid-template-rows: repeat(v-bind('props.vierkandle.boardsize'), minmax(0, 1fr));
+    grid-template-columns: repeat(v-bind('props.vierkandle.boardsize'), minmax(0, 1fr));
+}
+</style>

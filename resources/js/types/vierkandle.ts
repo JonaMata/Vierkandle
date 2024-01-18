@@ -3,6 +3,7 @@ namespace App {
         id: number;
         letters: string;
         date: date;
+        boardsize: int;
         solutions_count: number;
         solutions?: VierkandleSolution[];
     }

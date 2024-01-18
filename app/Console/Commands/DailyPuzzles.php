@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Vierkandle;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class DailyPuzzles extends Command
@@ -12,7 +13,7 @@ class DailyPuzzles extends Command
      *
      * @var string
      */
-    protected $signature = 'app:daily-puzzles';
+    protected $signature = 'app:daily-puzzles {size} {--date=}';
 
     /**
      * The console command description.
@@ -27,7 +28,10 @@ class DailyPuzzles extends Command
     public function handle() : void
     {
         info('Creating daily puzzles.');
-        Vierkandle::factory()->create();
+        Vierkandle::factory()->create([
+            'boardsize' => $this->argument('size'),
+            'date' => $this->option('date') ?? Carbon::tomorrow()]
+        );
         info('Created vierkandle for tomorrow.');
         info('Done.');
     }
