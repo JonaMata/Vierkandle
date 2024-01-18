@@ -36,6 +36,7 @@ watch([theme, prefersDark], updateTheme);
 
 onMounted(() => {
     theme.value = localStorage.theme ?? 'auto';
+    prefersDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', changePreferedTheme);
 })
 
