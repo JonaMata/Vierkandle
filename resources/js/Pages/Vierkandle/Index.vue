@@ -214,6 +214,7 @@ const findNeighbours = (index: number): number[] => {
 
 const dragStart = (e: MouseEvent | TouchEvent) => {
     e.preventDefault();
+    lastSolution.value = null;
     resultMessage.value = '';
     const index = letterElements.value.findIndex((element) => element.$el == e.target || element.$el.contains(e.target));
     if (index >= 0) {
@@ -236,7 +237,7 @@ const dragMove = (e: MouseEvent | TouchEvent) => {
         index = letterElements.value.findIndex((element) => element.$el == e.target || element.$el.contains(e.target));
     } else {
         const touchEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-        index = letterElements.value.findIndex((element) => element.$el.querySelector('.letter') == touchEl || element.$el.querySelector('.letter').contains(touchEl));
+        index = letterElements.value.findIndex((element) => element.$el.querySelector('.hitbox') == touchEl || element.$el.querySelector('.hitbox').contains(touchEl));
     }
     if (index >= 0) {
         if (chain.value.length > 0) {
@@ -360,8 +361,8 @@ const chainToInput = () => {
                                     </span>
                                     </div>
                                     <a v-if="lastSolution" :href="lastSolution.url" target="_blank"
-                                       :class="!showResult && lastSolution ? 'opacity-100 transition-opacity' : ''"
-                                       class="opacity-0 absolute text-xl hover:opacity-60 px-2 bg-gray-300 dark:bg-gray-900 border-black dark:border-white border rounded-md left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                                       :class="!showResult && lastSolution ? 'opacity-100 hover:opacity-60 transition-opacity' : ''"
+                                       class="opacity-0 absolute text-xl px-2 bg-gray-300 dark:bg-gray-900 border-black dark:border-white border rounded-md left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                                             {{ lastSolution.word }}
                                     </a>
                                 </div>

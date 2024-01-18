@@ -22,14 +22,26 @@ defineProps<{
     <div v-if="showIncludes" class="includes font-semibold text-gray-500">
         {{ includes }}
     </div>
-<!--    <div v-if="isStart" class="selected"></div>-->
+    <div class="hitbox"></div>
 </div>
 </template>
 
 <style scoped>
 .vierkand {
-    width: min(20svw, 10svh);
-    height: min(20svw, 10svh);
+    --size: min(20svw, 10svh);
+    width: var(--size);
+    height: var(--size);
+}
+
+.hitbox {
+    position: absolute;
+    width: calc(var(--size) * .8);
+    height: calc(var(--size) * .8);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: transparent;
 }
 
 .used {
@@ -42,8 +54,6 @@ defineProps<{
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 300%;
-    line-height: 80%;
-    width: 50%;
     text-align: center;
 }
 
