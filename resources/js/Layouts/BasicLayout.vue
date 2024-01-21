@@ -114,11 +114,11 @@ onUnmounted(() => {
                                         <template v-if="$page.props.auth.user">
                                             <!-- Account Management -->
                                             <div class="block px-4 py-2 text-xs text-gray-400">
-                                                Manage Account
+                                                Account Beheren
                                             </div>
 
                                             <DropdownLink :href="route('profile.show')">
-                                                Profile
+                                                Profiel
                                             </DropdownLink>
 
                                             <div class="border-t border-gray-200 dark:border-gray-600"/>
@@ -126,16 +126,16 @@ onUnmounted(() => {
                                             <!-- Authentication -->
                                             <form @submit.prevent="logout">
                                                 <DropdownLink as="button">
-                                                    Log Out
+                                                    Uitloggen
                                                 </DropdownLink>
                                             </form>
                                         </template>
                                         <template v-else>
                                             <DropdownLink :href="route('login')">
-                                                Login
+                                                Inloggen
                                             </DropdownLink>
                                             <DropdownLink :href="route('register')">
-                                                Register
+                                                Registreren
                                             </DropdownLink>
                                         </template>
                                     </template>
@@ -213,13 +213,13 @@ onUnmounted(() => {
 
                         <div class="mt-3 space-y-1">
                             <ResponsiveNavLink :href="route('profile.show')" :active="route().current('profile.show')">
-                                Profile
+                                Profiel
                             </ResponsiveNavLink>
 
                             <!-- Authentication -->
                             <form method="POST" @submit.prevent="logout">
                                 <ResponsiveNavLink as="button">
-                                    Log Out
+                                    Uitloggen
                                 </ResponsiveNavLink>
                             </form>
 
@@ -229,11 +229,11 @@ onUnmounted(() => {
 
                         <div class="space-y-1">
                             <ResponsiveNavLink :href="route('login')" :active="route().current('login')">
-                                Login
+                                Inloggen
                             </ResponsiveNavLink>
 
                             <ResponsiveNavLink :href="route('register')" :active="route().current('register')">
-                                Register
+                                Registreren
                             </ResponsiveNavLink>
                         </div>
                     </div>
