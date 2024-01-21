@@ -2,6 +2,7 @@ import {Ref, ref, watch} from "vue";
 import {migrateStorage} from "@/Helpers/migrateStorage";
 import axios from "axios";
 import {usePage} from "@inertiajs/vue3";
+import {migrations} from "@/Helpers/migrations";
 
 export function useVierkandleStorage(vierkandle: App.Vierkandle) {
 
@@ -34,6 +35,7 @@ export function useVierkandleStorage(vierkandle: App.Vierkandle) {
         words: [],
         bonusWords: [],
         mistakes: 0,
+        version: migrations[migrations.length - 1].version,
     }
     const vierkandleStorage = ref<App.SolutionStorage>(newSolutionStorage);
 
