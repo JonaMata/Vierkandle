@@ -50,7 +50,7 @@ const closeModal = () => {
             </div>
         </template>
         <template #content>
-            <div class="min-w-full flex flex-col gap-10 prose dark:prose-invert prose-sm md:prose-base overflow-y-auto max-h-[75svh]">
+            <div class="min-w-full flex flex-col gap-10 prose dark:prose-invert prose-sm md:prose-base overflow-y-auto max-h-[70dvh]">
                 <div v-for="(note, index) in notesToShow"
                      v-html="note.content"
                      :class="{ 'border-t border-gray-300 dark:border-gray-700 pt-10': index > 0}"
