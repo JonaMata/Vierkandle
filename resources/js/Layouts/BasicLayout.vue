@@ -54,7 +54,7 @@ onUnmounted(() => {
         <Banner/>
         <VersionModal/>
 
-        <div class="min-h-screen max-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
+        <div class="min-h-[100dvh] max-h-[100dvh] bg-gray-100 dark:bg-gray-900 flex flex-col">
             <nav class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                 <!-- Primary Navigation Menu -->
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

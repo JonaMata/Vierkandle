@@ -1,0 +1,17 @@
+{
+    "name":"Vierkandle",
+    "short_name":"Vierkandle",
+    "start_url":"/",
+    "display":"standalone",
+    "background_color":"#fff",
+    "theme_color":"#ef4444",
+    "scope": ".",
+    "description":"Dagelijkse woordpuzzels",
+    "icons":[
+        {
+            "src":"vierkandle.png",
+            "sizes":"96x96",
+            "type":"image/png"
+        }
+    ]
+}
