@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {useVierkandleStorage} from "@/Composables/useVierkandleStorage";
+import {computed} from "vue";
+
 const props = defineProps<{
     title?: string,
     routeName?: string,
@@ -10,7 +13,8 @@ const props = defineProps<{
     },
 }>()
 
-const solutionsFound = JSON.parse(localStorage.getItem('vierkandle_'+props.vierkandle.id) ?? '[]').length;
+const { vierkandleStorage } = useVierkandleStorage(props.vierkandle);
+const solutionsFound = computed(() => vierkandleStorage.value.words.length);
 </script>
 
 <template>

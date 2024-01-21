@@ -23,6 +23,6 @@ class Vierkandle extends Model
     }
 
     public function getSolutionCountAttribute(): int {
-        return $this->solutions()->count();
+        return $this->solutions()->where('bonus', false)->count();
     }
 }

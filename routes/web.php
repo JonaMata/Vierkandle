@@ -19,24 +19,13 @@ Route::get('', [\App\Http\Controllers\VierkandleController::class, 'index'])->na
 Route::get('/list', [\App\Http\Controllers\VierkandleController::class, 'list'])->name('list');
 Route::get('/{vierkandle}', [\App\Http\Controllers\VierkandleController::class, 'show'])->name('show');
 
-//Route::get('/', function () {
-//    return Inertia::render('Welcome', [
-//        'canLogin' => Route::has('login'),
-//        'canRegister' => Route::has('register'),
-//        'laravelVersion' => Application::VERSION,
-//        'phpVersion' => PHP_VERSION,
-//    ]);
-//});
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
+    Route::post('/guess', [\App\Http\Controllers\VierkandleController::class, 'guess'])->name('guess');
+    Route::prefix('user/')->name('user.')->controller(\App\Http\Controllers\UserController::class)->group(function () {
+        Route::post('theme', 'updateTheme')->name('theme');
+    });
+});
 
-//Route::middleware([
-//    'auth:sanctum',
-//    config('jetstream.auth_session'),
-//    'verified',
-//])->group(function () {
-//    Route::get('/dashboard', function () {
-//        return Inertia::render('Dashboard');
-//    })->name('dashboard');
-//    Route::prefix('vierkandle')->name('vierkandle')->controller(\App\Http\Controllers\VierkandleController::class)->group(function () {
-//        Route::get('', 'index')->name('index');
-//    });
-//});
+Route::prefix('api')->name('api.')->group(function () {
+    Route::get('vierkandle/{vierkandle}', [\App\Http\Controllers\VierkandleController::class, 'vierkandle'])->name('vierkandle');
+});

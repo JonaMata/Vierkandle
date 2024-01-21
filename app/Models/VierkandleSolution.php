@@ -13,9 +13,21 @@ class VierkandleSolution extends Model
 
     protected $casts = [
         'bonus' => 'boolean',
+        'chain' => 'array',
     ];
+
+    protected $appends = ['guessed'];
+
     public function vierkandle() : BelongsTo
     {
         return $this->belongsTo(Vierkandle::class);
+    }
+
+    public function getGuessedAttribute() : bool | null
+    {
+        if (!auth()->check()) {
+            return null;
+        }
+        return in_array($this->id, VierkandleSolve::ofUser(auth()->user(), $this->vierkandle)->solution_ids);
     }
 }

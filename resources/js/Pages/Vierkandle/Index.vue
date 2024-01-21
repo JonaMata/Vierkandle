@@ -1,34 +1,31 @@
 <script setup lang="ts">
-import AppLayout from '@/Layouts/AppLayout.vue';
 import Vierkand from "@/Components/Vierkandle/Vierkand.vue";
-import {computed, nextTick, onMounted, ref, watch} from "vue";
+import {computed, nextTick, onMounted, ref, reactive, watch} from "vue";
 import Connection from "@/Components/Vierkandle/Connection.vue";
 import Checkbox from "@/Components/Checkbox.vue";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
+import {usePage} from "@inertiajs/vue3";
+import {useVierkandleStorage} from "@/Composables/useVierkandleStorage";
+import axios from "axios";
 
 const props = defineProps<{
-    vierkandle: { letters: string, solutions: Array<{ word: string, url: string, chain: string, bonus: boolean }> },
+    vierkandle: App.Vierkandle,
 }>()
 
+const page = usePage();
+const user = computed(() => page.props.auth.user);
+
 const solutions = ref<{
-    [Key: number]: { [Key: string]: { url: string, bonus: boolean, guessed: boolean, chain: number[] } }
+    [Key: number]: { [Key: string]: VierkandleSolution }
 }>({});
-const useLocalStorage = !!localStorage;
+
+const {vierkandleStorage, addWord} = useVierkandleStorage(props.vierkandle);
 
 onMounted(() => {
-    window.addEventListener('scroll', reRenderLines);
-    window.addEventListener('keydown', () => {
+    document.addEventListener('keydown', () => {
         inputField.value?.focus();
     })
-    const guessedWords: string[] = []
-    if (useLocalStorage) {
-        const guessedWordsString = localStorage.getItem('vierkandle_' + props.vierkandle.id);
-        if (guessedWordsString) {
-            guessedWords.push(...JSON.parse(guessedWordsString));
-        } else {
-            localStorage.setItem('vierkandle_' + props.vierkandle.id, JSON.stringify(guessedWords));
-        }
-    }
+
     for (const solution of props.vierkandle.solutions) {
         let length = solution.word.length;
         if (solution.bonus) {
@@ -37,16 +34,23 @@ onMounted(() => {
         if (!(length in solutions.value)) {
             solutions.value[length] = {};
         }
-        solutions.value[length][solution.word] = {
-            url: solution.url,
-            bonus: solution.bonus,
-            guessed: guessedWords.includes(solution.word),
-            chain: solution.chain.split(',').map((n) => parseInt(n))
-        };
+        if (solution.guessed) {
+            if (solution.bonus && !vierkandleStorage.value?.bonusWords.includes(solution.word)) {
+                vierkandleStorage.value?.bonusWords.push(solution.word);
+            } else if (!solution.bonus && !vierkandleStorage.value?.words.includes(solution.word)) {
+                vierkandleStorage.value?.words.push(solution.word);
+            }
+        } else if (vierkandleStorage.value?.words.includes(solution.word) || vierkandleStorage.value?.bonusWords.includes(solution.word)) {
+            solution.guessed = true;
+            if (user.value) {
+                addWord(solution);
+            }
+        }
+        solutions.value[length][solution.word] = solution;
     }
-    for (const num of Object.keys(solutions.value)) {
+    for (const num: number of Object.keys(solutions.value)) {
         solutions.value[num] = Object.keys(solutions.value[num]).sort().reduce(
-            (obj, key) => {
+            (obj: { [Key: string]: VierkandleSolution }, key: string) => {
                 obj[key] = solutions.value[num][key];
                 return obj;
             },
@@ -90,8 +94,6 @@ const totalWords = computed(() => {
 const inputField = ref<HTMLInputElement | null>(null);
 const input = ref('');
 const chain = ref<number[]>([]);
-const hintMissing = ref(false);
-const hintLetters = ref(false);
 const resultMessage = ref('');
 const showResult = ref(false);
 const rotation = ref(0);
@@ -120,25 +122,21 @@ const guessWord = () => {
             message += 'Bonuswoord: ';
         }
         if (length in solutions.value && word in solutions.value[length]) {
-            if (!solutions.value[length][word].guessed) {
-                solutions.value[length][word].guessed = true;
-                if (useLocalStorage) {
-                    const guessedWords: string[] = JSON.parse(localStorage.getItem('vierkandle_' + props.vierkandle.id) ?? '[]');
-                    if (!guessedWords.includes(word)) {
-                        guessedWords.push(word);
-                        localStorage.setItem('vierkandle_' + props.vierkandle.id, JSON.stringify(guessedWords));
-                    }
-                }
+            const solution = solutions.value[length][word];
+            if (!solution.guessed) {
+                solution.guessed = true;
                 if (!message) {
                     message += 'Goed geraden: ';
                 }
                 message += word;
                 lastSolution.value = {word, url: solutions.value[length][word].url};
+                addWord(solution);
             } else {
                 message = 'Al geraden!';
             }
         } else {
             message = 'Onbekend woord!';
+            vierkandleStorage.value.mistakes++;
         }
     } else {
         message = 'Te kort woord!';
@@ -216,16 +214,16 @@ const dragStart = (e: MouseEvent | TouchEvent) => {
     e.preventDefault();
     lastSolution.value = null;
     resultMessage.value = '';
-    const index = letterElements.value.findIndex((element) => element.$el == e.target || element.$el.contains(e.target));
+    const index = letterElements.value.findIndex((element: Component) => element.$el == e.target || element.$el.contains(e.target));
     if (index >= 0) {
         chain.value = [index];
     }
     if (e instanceof MouseEvent) {
         window.addEventListener('mousemove', dragMove);
-        window.addEventListener('mouseup', dragEnd);
+        window.addEventListener('mouseup', dragEnd, {once: true});
     } else {
         window.addEventListener('touchmove', dragMove, {passive: false});
-        window.addEventListener('touchend', dragEnd, {passive: false});
+        window.addEventListener('touchend', dragEnd, {passive: false, once: true});
     }
     chainToInput()
 }
@@ -233,12 +231,12 @@ const dragStart = (e: MouseEvent | TouchEvent) => {
 const dragMove = (e: MouseEvent | TouchEvent) => {
     e.preventDefault();
     let index = -1;
-    if (e instanceof MouseEvent) {
-        index = letterElements.value.findIndex((element) => element.$el == e.target || element.$el.contains(e.target));
-    } else {
-        const touchEl = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-        index = letterElements.value.findIndex((element) => element.$el.querySelector('.hitbox') == touchEl || element.$el.querySelector('.hitbox').contains(touchEl));
+    let target = e.target;
+    if (e instanceof TouchEvent) {
+        target = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
     }
+    index = letterElements.value.findIndex((element: Component) => element.$el.querySelector('.hitbox') == target || element.$el.querySelector('.hitbox').contains(target));
+
     if (index >= 0) {
         if (chain.value.length > 0) {
             const neighbours = findNeighbours(chain.value[chain.value.length - 1]);
@@ -259,8 +257,6 @@ const dragMove = (e: MouseEvent | TouchEvent) => {
 const dragEnd = (e: MouseEvent | TouchEvent) => {
     window.removeEventListener('mousemove', dragMove);
     window.removeEventListener('touchmove', dragMove);
-    window.removeEventListener('mouseup', dragEnd);
-    window.removeEventListener('touchend', dragEnd);
     guessWord();
 }
 
@@ -271,25 +267,24 @@ const chainToInput = () => {
 
 <template>
     <BasicLayout :title="$page.url == '/' ? 'Vandaag' : vierkandle.date">
-
-        <div class="py-4 dark:text-white">
+        <div class="py-4 dark:text-white absolute w-full h-full overflow-hidden">
             <input class="opacity-0 fixed top-full" v-model="input" ref="inputField" @input="handleInput"
                    @keydown.enter="guessWord"/>
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="h-full max-w-7xl px-auto sm:px-6 lg:px-8">
                 <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg h-[77svh] max-h-[77svh] md:h-[85svh] md:max-h-[85svh]">
+                    class="h-full p-5 bg-white dark:bg-gray-800 shadow-xl sm:rounded-lg">
                     <div
-                        class="m-5 grid grid-cols-1 md:grid-cols-3 items-start content-start h[73svh] max-h-[73svh] md:h-[80svh] md:max-h-[80svh] overflow-scroll md:overflow-hidden">
-                        <div class="mx-auto md:mx-0 md:max-h-[80svh] md:overflow-y-auto">
+                        class="h-full grid grid-cols-1 md:grid-cols-3 items-start content-start overflow-y-auto md:overflow-hidden">
+                        <div class="mx-auto md:mx-0 md:h-full md:overflow-y-auto">
                             <div class="mb-2" v-if="amountGuessed/totalWords >= .6">
                                 <h1 class="text-2xl font-bold mb-2">Hints:</h1>
                                 <label class="flex items-center">
-                                    <Checkbox v-model:checked="hintMissing" name="hint-missing"/>
+                                    <Checkbox v-model:checked="vierkandleStorage.hints.showMissing" name="hint-missing"/>
                                     <span
                                         class="ms-2 text-sm text-gray-600 dark:text-gray-400">Laat missende woorden zien.</span>
                                 </label>
                                 <label class="flex items-center">
-                                    <Checkbox v-model:checked="hintLetters" name="hint-letters"/>
+                                    <Checkbox v-model:checked="vierkandleStorage.hints.showLetters" name="hint-letters"/>
                                     <span
                                         class="ms-2 text-sm text-gray-600 dark:text-gray-400">Toon sommige letters.</span>
                                 </label>
@@ -314,19 +309,19 @@ const chainToInput = () => {
                                                 {{ word }}
                                             </template>
                                         </div>
-                                        <div v-else-if="hintLetters" class="text-gray-400">{{
+                                        <div v-else-if="vierkandleStorage.hints.showLetters" class="text-gray-400">{{
                                                 word.substring(0, Math.ceil(word.length / 6)) + '*'.repeat((word.length - Math.floor(word.length / 6)) - (Math.ceil(word.length / 6))) + word.substring(word.length - Math.floor(word.length / 6), word.length)
                                             }}
                                         </div>
-                                        <div v-else-if="hintMissing" class="text-gray-400">
+                                        <div v-else-if="vierkandleStorage.hints.showMissing" class="text-gray-400">
                                             {{ '*'.repeat(word.length) }}
                                         </div>
                                     </template>
                                 </div>
                                 <span
-                                    v-if="!hintLetters && !hintMissing && Object.values(subSolutions).filter((data) => data.guessed == false).length > 0"
+                                    v-if="!vierkandleStorage.hints.showLetters && !vierkandleStorage.hints.hintMissing && Object.values(subSolutions).filter((data) => !data.guessed).length > 0"
                                     class="text-gray-600 dark:text-gray-400 italic">
-                                    +{{ Object.values(subSolutions).filter((data) => data.guessed == false).length }} woorden te gaan
+                                    +{{ Object.values(subSolutions).filter((data) => !data.guessed).length }} woorden te gaan
                                 </span>
                             </div>
                         </div>
@@ -348,10 +343,9 @@ const chainToInput = () => {
                                         ⭐️
                                     </div>
                                 </div>
-                                <div class="flex relative">
-                                    <div class="flex-grow w-0 text-4xl font-bold mx-auto mb-2 text-center">
-                                    <span
-                                        class="opacity-0">X</span>
+                                <div class="flex relative mb-2">
+                                    <div
+                                        class="flex-grow flex justify-center items-center w-0 h-10 text-4xl font-bold text-center">
                                         <span class="text-2xl transition"
                                               :class="showResult ? '' : 'opacity-0'">
                                     {{ resultMessage }}
@@ -363,11 +357,11 @@ const chainToInput = () => {
                                     <a v-if="lastSolution" :href="lastSolution.url" target="_blank"
                                        :class="!showResult && lastSolution ? 'opacity-100 hover:opacity-60 transition-opacity' : ''"
                                        class="opacity-0 absolute text-xl px-2 bg-gray-300 dark:bg-gray-900 border-black dark:border-white border rounded-md left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                                            {{ lastSolution.word }}
+                                        {{ lastSolution.word }}
                                     </a>
                                 </div>
                                 <div
-                                    class="grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500 select-none"
+                                    class="mx-auto grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500 select-none"
                                     :style="`transform: rotate(${rotation*90}deg)`">
                                     <Vierkand v-for="(letter, i) in letters"
                                               class="transition-transform duration-500"

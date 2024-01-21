@@ -12,30 +12,35 @@ use Illuminate\Support\Facades\Http;
 class VierkandleFactory extends Factory
 {
     protected $model = Vierkandle::class;
+
     public function configure()
     {
         return $this->afterCreating(function (Vierkandle $vierkandle) {
             $solutions = $this->findSolutions($vierkandle->letters);
             $client = new \GuzzleHttp\Client(['base_uri' => 'https://nl.wiktionary.org', 'allow_redirects' => false]);
             foreach ($solutions as $solution) {
-                $url = 'w/index.php?search='.strtolower($solution['word']).'&ns0=1';
+                $url = 'w/index.php?search=' . strtolower($solution['word']) . '&ns0=1';
                 $response = $client->request('GET', $url);
                 $solution['url'] = $response->getStatusCode() == 302 ? $response->getHeader('location')[0] : null;
+                if (!$solution['url']) {
+                    $solution['bonus'] = true;
+                }
                 $vierkandle->solutions()->create($solution);
             }
         });
     }
+
     public function definition()
     {
         $found = false;
         $tries = 0;
         while (!$found) {
             $tries++;
-            \Laravel\Prompts\info('Try '.$tries.'...');
+            \Laravel\Prompts\info('Try ' . $tries . '...');
             $letters = $this->generateBoard(4);
             $solutions = $this->findSolutions($letters);
             $longestWord = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->max(fn($solution) => strlen($solution['word']));
-            $usedLetters = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->map(fn($solution) => explode(',', $solution['chain']))->flatten()->unique()->count();
+            $usedLetters = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->map(fn($solution) => $solution['chain'])->flatten()->unique()->count();
             $mandatoryWords = collect($solutions)->filter(fn($solution) => !$solution['bonus'])->count();
             $found = $longestWord >= 8 && $usedLetters >= 16 && $mandatoryWords <= 100;
         }
@@ -47,8 +52,14 @@ class VierkandleFactory extends Factory
 
     function generateBoard(int $size): string
     {
-        $sampleSpace = str_split("EEEEEEEEEEEEEEEEEENNNNNNNNNNAAAAAAOOOOOOIIIIDDDDDRRRRRSSSSSTTTTTGGGKKKLLLMMMBBPPUUUFFHHJJVVZZCCWWXYQ");
-        $usedLetters = array_map(fn($key): string => $sampleSpace[$key], array_rand($sampleSpace, $size * $size));
+//        $sampleSpace = str_split("EEEEEEEEEEEEEEEEEENNNNNNNNNNAAAAAAOOOOOOIIIIDDDDDRRRRRSSSSSTTTTTGGGKKKLLLMMMBBPPUUUFFHHJJVVZZCCWWXYQ");
+        $sampleSpace = str_split("EEEEEEENNNNNNAAAAAOOOOOIIIIDDDDRRRRSSSSTTTTGGGKKKLLLMMMBBPPUUUFFHHJJVVZZCCWWXYQ");
+        $keys = [];
+        for ($i = 0; $i < $size ** 2; $i++) {
+            $keys[] = rand(0, count($sampleSpace) - 1);
+        }
+//        $usedLetters = array_map(fn($key): string => $sampleSpace[$key], array_rand($sampleSpace, $size * $size));
+        $usedLetters = array_map(fn($key): string => $sampleSpace[$key], $keys);
         shuffle($usedLetters);
         $letters = implode($usedLetters);
         for ($x = 0; $x < $size; $x++) {
@@ -73,7 +84,7 @@ class VierkandleFactory extends Factory
         return $solutions;
     }
 
-    function attempt(array $chain, string $word, string $letters, Trie $wordsTrie, array & $found): array
+    function attempt(array $chain, string $word, string $letters, Trie $wordsTrie, array &$found): array
     {
         $solutions = [];
         $wordsResult = $wordsTrie->search($word);
@@ -84,7 +95,7 @@ class VierkandleFactory extends Factory
 
         if (($wordsResult == Trie::FOUND_WORD || $wordsResult == Trie::FOUND_BONUS_WORD) && !in_array($word, $found)) {
             $found[] = $word;
-            $solutions[] = ['word' => $word, 'chain' => implode(',', $chain), 'bonus' => $wordsResult == Trie::FOUND_BONUS_WORD];
+            $solutions[] = ['word' => $word, 'chain' => $chain, 'bonus' => $wordsResult == Trie::FOUND_BONUS_WORD];
         }
         foreach ($this->findNeighbours($letters, end($chain)) as $neighbour) {
             if (!in_array($neighbour, $chain)) {
@@ -103,11 +114,11 @@ class VierkandleFactory extends Factory
 
         $neighbours = [];
 
-        for ($x = $curX-1; $x <= $curX+1; $x++) {
-            for ($y = $curY-1; $y <= $curY+1; $y++) {
+        for ($x = $curX - 1; $x <= $curX + 1; $x++) {
+            for ($y = $curY - 1; $y <= $curY + 1; $y++) {
                 if ($x >= 0 && $x < $size && $y >= 0 && $y < $size) {
                     if ($x != $curX || $y != $curY) {
-                        $neighbours[] = $y*$size+$x;
+                        $neighbours[] = $y * $size + $x;
                     }
                 }
             }
@@ -124,7 +135,7 @@ class VierkandleFactory extends Factory
             $word = $splits[0];
             $perc = $splits[1];
             if ($this->wordIsPossible($letters, $word)) {
-                $newTrie->insert($word, $perc<70);
+                $newTrie->insert($word, $perc < 70);
             }
         }
         return $newTrie;
