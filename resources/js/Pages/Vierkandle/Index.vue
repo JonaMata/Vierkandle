@@ -34,18 +34,6 @@ onMounted(() => {
         if (!(length in solutions.value)) {
             solutions.value[length] = {};
         }
-        if (solution.guessed) {
-            if (solution.bonus && !vierkandleStorage.value?.bonusWords.includes(solution.word)) {
-                vierkandleStorage.value?.bonusWords.push(solution.word);
-            } else if (!solution.bonus && !vierkandleStorage.value?.words.includes(solution.word)) {
-                vierkandleStorage.value?.words.push(solution.word);
-            }
-        } else if (vierkandleStorage.value?.words.includes(solution.word) || vierkandleStorage.value?.bonusWords.includes(solution.word)) {
-            solution.guessed = true;
-            if (user.value) {
-                addWord(solution);
-            }
-        }
         solutions.value[length][solution.word] = solution;
     }
     for (const num: number of Object.keys(solutions.value)) {

@@ -38,14 +38,18 @@ class VierkandleController extends Controller
     public function guess(Request $request)
     {
         $validated = $request->validate([
-            'id' => 'required|integer|exists:vierkandle_solutions,id',
-            'word' => 'required|string',
+            'solutions' => 'required|array',
+            'solutions.*' => 'required|array',
+            'solutions.*.id' => 'required|integer|exists:vierkandle_solutions,id',
+            'solutions.*.word' => 'required|string',
         ]);
-        $vierkandleSolution = VierkandleSolution::query()->findOrFail($validated['id']);
-        if ($vierkandleSolution->word !== $validated['word']) {
-            return response()->json(['success' => false, 'message' => "Word doesn't match solution"]);
+        foreach ($validated['solutions'] as $word) {
+            $vierkandleSolution = VierkandleSolution::query()->findOrFail($word['id']);
+            if ($vierkandleSolution->word !== $word['word']) {
+                return response()->json(['success' => false, 'message' => "Word doesn't match solution"]);
+            }
+            VierkandleSolve::ofUser(auth()->user(), $vierkandleSolution->vierkandle)->addWord($vierkandleSolution);
         }
-        VierkandleSolve::ofUser(auth()->user(), $vierkandleSolution->vierkandle)->addWord($vierkandleSolution);
-        return response()->json(['success' => true, 'message' => 'Word added to solution']);
+        return response()->json(['success' => true, 'message' => 'Words added to solution']);
     }
 }
