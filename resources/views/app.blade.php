@@ -30,7 +30,7 @@
                 try {
                     await navigator
                         .serviceWorker
-                        .register('serviceworker.js');
+                        .register('/serviceworker.js');
                 }
                 catch (e) {
                     console.log('SW registration failed');

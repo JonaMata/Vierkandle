@@ -14,10 +14,13 @@ use Inertia\Inertia;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::get('', [\App\Http\Controllers\VierkandleController::class, 'index'])->name('index');
-Route::get('/list', [\App\Http\Controllers\VierkandleController::class, 'list'])->name('list');
-Route::get('/{vierkandle}', [\App\Http\Controllers\VierkandleController::class, 'show'])->name('show');
+Route::middleware([\App\Http\Middleware\ForceHttps::class])->group(function () {
+    Route::get('', [\App\Http\Controllers\VierkandleController::class, 'index'])->name('index');
+    Route::get('/list', [\App\Http\Controllers\VierkandleController::class, 'list'])->name('list');
+    Route::get('/{vierkandle}', [\App\Http\Controllers\VierkandleController::class, 'show'])->name('show');
+    Route::get('migrate/migrate', [\App\Http\Controllers\MigrateController::class, 'migrate'])->name('migrate');
+});
+Route::get('migrate/child', [\App\Http\Controllers\MigrateController::class, 'child'])->name('migrate.child');
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
     Route::post('/guess', [\App\Http\Controllers\VierkandleController::class, 'guess'])->name('guess');

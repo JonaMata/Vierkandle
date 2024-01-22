@@ -17,10 +17,11 @@ const releaseNotes = [
     {version: "0.0.0", content : () => import("@/ReleaseNotes/0.0.0.md?raw")},
     {version: "0.1.0", content: () => import("@/ReleaseNotes/0.1.0.md?raw")},
     {version: "0.1.1", content: () => import("@/ReleaseNotes/0.1.1.md?raw")},
+    {version: "0.1.3", content: () => import("@/ReleaseNotes/0.1.3.md?raw")},
 ]
 
 onMounted(async () => {
-    if (version.value <= "0.1.0") {
+    if (version.value <= releaseNotes[releaseNotes.length - 1].version) {
         notesToShow.value = releaseNotes.filter((note) => note.version > version.value).reverse();
         if (notesToShow.value.length > 0) {
             for (const note of notesToShow.value) {

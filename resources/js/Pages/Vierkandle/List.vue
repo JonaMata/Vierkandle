@@ -8,11 +8,16 @@ import InputLabel from "@/Components/InputLabel.vue";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
 import NavLink from "@/Components/NavLink.vue";
 import VierkandlePreview from "@/Components/Vierkandle/VierkandlePreview.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
 
 defineProps<{
     today?: App.Vierkandle,
     vierkandles: App.Vierkandle[],
 }>()
+
+const migrateData = () => {
+    window.location.href = route('migrate.child')
+}
 </script>
 
 <template>
@@ -20,9 +25,10 @@ defineProps<{
         <template #header>
             Alle Vierkandles
         </template>
-        <div class="py-4 dark:text-white">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl p-5 sm:rounded-lg h-[85svh] max-h-[85svh]">
+        <div class="py-4 dark:text-white absolute w-full h-full overflow-hidden">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 h-full">
+                <div class="bg-white dark:bg-gray-800 h-full overflow-y-auto shadow-xl p-5 sm:rounded-lg">
+                    <div class="mb-10">Mis je voortgang sinds de update? <PrimaryButton @click="migrateData">Migreer data</PrimaryButton></div>
                     <div class="flex flex-wrap gap-5">
                         <VierkandlePreview v-if="today" :vierkandle="today" title="Vandaag" route-name="index" />
 
