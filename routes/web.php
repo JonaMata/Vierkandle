@@ -18,7 +18,7 @@ Route::middleware([\App\Http\Middleware\ForceHttps::class])->group(function () {
     Route::get('', [\App\Http\Controllers\VierkandleController::class, 'index'])->name('index');
     Route::get('/list', [\App\Http\Controllers\VierkandleController::class, 'list'])->name('list');
     Route::get('/{vierkandle}', [\App\Http\Controllers\VierkandleController::class, 'show'])->name('show');
-    Route::get('migrate/migrate', [\App\Http\Controllers\MigrateController::class, 'migrate'])->name('migrate');
+    Route::post('/migrate/migrate', [\App\Http\Controllers\MigrateController::class, 'migrate'])->name('migrate');
 });
 Route::get('migrate/child', [\App\Http\Controllers\MigrateController::class, 'child'])->name('migrate.child');
 

@@ -3,18 +3,19 @@ import {computed, onMounted, ref} from "vue";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
 import {useVierkandleStorage} from "@/Composables/useVierkandleStorage";
 import axios from "axios";
+import {router} from "@inertiajs/vue3";
 
 interface MigrationData {
     storage: App.VierkandleStorage,
     vierkandle: App.Vierkandle,
 }
 
-const migrationStatus = ref('Migrating data. Do not close!');
+const migrationStatus = ref('Data aan het migreren. Dit kan even duren.');
 const dataToSend = ref<MigrationData[]>([]);
 
 onMounted(async () => {
     if (location.protocol === 'https:') {
-        location.replace(`http:${location.href.substring(location.protocol.length)}`);
+        location.href = `http:${location.href.substring(location.protocol.length)}`;
     }
     if (true || !localStorage.migrated) {
         let failed = false;
@@ -40,10 +41,23 @@ onMounted(async () => {
         }
         if (!failed) {
             localStorage.migrated = true;
-            migrationStatus.value = 'Migrating done. You can close this window.';
-            window.location.href = route('migrate')+`?data=${JSON.stringify(dataToSend.value)}`;
+            migrationStatus.value = 'Te migreren data is verzameld. Je wordt doorgestuurd.';
+            const f = document.createElement('form');
+            f.action=route('migrate').replace('http://', 'https://');
+            f.method='POST';
+
+            const i=document.createElement('input');
+            i.type='hidden';
+            i.name='migrations';
+            i.value=JSON.stringify(dataToSend.value);
+            f.appendChild(i);
+
+            document.body.appendChild(f);
+            f.submit();
+            // router.post(route('migrate').replace('http://', 'https://'), {migrations: dataToSend.value});
+            // window.location.href = route('migrate')+`?data=${JSON.stringify(dataToSend.value)}`;
         } else {
-            migrationStatus.value = 'Migrating failed. Please try again later.';
+            migrationStatus.value = 'Migreren mislukt, probeer het later opnieuw.';
         }
     }
 });
@@ -58,8 +72,6 @@ onMounted(async () => {
                 <div
                     class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl p-5 sm:rounded-lg h-full overflow-y-auto">
                     {{ migrationStatus }}
-                    <br><br>
-                    {{dataToSend }}
                 </div>
             </div>
         </div>

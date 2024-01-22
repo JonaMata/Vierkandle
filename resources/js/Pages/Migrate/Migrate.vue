@@ -2,18 +2,16 @@
 import {computed, onMounted, ref} from "vue";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
 import {useVierkandleStorage} from "@/Composables/useVierkandleStorage";
-import {m} from "../../../../public/build/assets/app-__n1wT1D";
 
 const message = ref('Gemigreerde data opslaan. Sluit dit venster niet!');
 
+const props = defineProps<{
+    migrations: Array,
+}>()
+
 onMounted(() => {
-    if (location.protocol === 'http:') {
-        location.replace(`https:${location.href.substring(location.protocol.length)}`);
-    }
-    const urlData = new URLSearchParams(window.location.search);
-    const data = JSON.parse(urlData.get('data'));
+    const data = JSON.parse(props.migrations);
     for (const migration of data) {
-        console.log(migration);
         const {vierkandleStorage} = useVierkandleStorage(migration.vierkandle)
         for (const word of migration.storage.words) {
             if (!vierkandleStorage.value.words.includes(word)) {

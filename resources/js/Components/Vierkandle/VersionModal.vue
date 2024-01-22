@@ -18,6 +18,7 @@ const releaseNotes = [
     {version: "0.1.0", content: () => import("@/ReleaseNotes/0.1.0.md?raw")},
     {version: "0.1.1", content: () => import("@/ReleaseNotes/0.1.1.md?raw")},
     {version: "0.1.3", content: () => import("@/ReleaseNotes/0.1.3.md?raw")},
+    {version: "0.1.4", content: () => import("@/ReleaseNotes/0.1.4.md?raw")},
 ]
 
 onMounted(async () => {

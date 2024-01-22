@@ -8,7 +8,12 @@ use Inertia\Inertia;
 class MigrateController extends Controller
 {
     public function migrate(Request $request) {
-        return Inertia::render('Migrate/Migrate');
+        $validated = $request->validate([
+            'migrations' => 'required',
+        ]);
+        return Inertia::render('Migrate/Migrate', [
+            'migrations' => $validated['migrations'],
+        ]);
     }
 
     public function child() {
