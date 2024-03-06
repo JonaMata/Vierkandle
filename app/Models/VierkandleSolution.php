@@ -16,8 +16,6 @@ class VierkandleSolution extends Model
         'chain' => 'array',
     ];
 
-    protected $appends = ['guessed'];
-
     public function vierkandle() : BelongsTo
     {
         return $this->belongsTo(Vierkandle::class);

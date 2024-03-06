@@ -242,7 +242,7 @@ onUnmounted(() => {
 
             <!-- Page Heading -->
             <header v-if="$slots.header" class="bg-white dark:bg-gray-800 shadow">
-                <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 font-medium text-xl">
+                <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 font-medium text-xl text-gray-900 dark:text-gray-100">
                     <slot name="header"/>
                 </div>
             </header>

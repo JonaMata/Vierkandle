@@ -19,6 +19,7 @@ const releaseNotes = [
     {version: "0.1.1", content: () => import("@/ReleaseNotes/0.1.1.md?raw")},
     {version: "0.1.3", content: () => import("@/ReleaseNotes/0.1.3.md?raw")},
     {version: "0.1.4", content: () => import("@/ReleaseNotes/0.1.4.md?raw")},
+    {version: "0.2.0", content: () => import("@/ReleaseNotes/0.2.0.md?raw")},
 ]
 
 onMounted(async () => {
@@ -27,10 +28,8 @@ onMounted(async () => {
         if (notesToShow.value.length > 0) {
             for (const note of notesToShow.value) {
                 const content = await note.content();
-                console.log(md.render(content.default));
                 note.content = md.render(content.default);
             }
-            console.log(notesToShow.value);
             showModal.value = true;
         }
     }

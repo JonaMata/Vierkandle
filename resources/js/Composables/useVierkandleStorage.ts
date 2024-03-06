@@ -45,39 +45,40 @@ export function useVierkandleStorage(vierkandle: App.Vierkandle) {
     } else {
         vierkandleStorage.value = newSolutionStorage;
     }
-    if (user) {
-        const wordsToAdd: App.VierkandleSolution[] = [];
+    const wordsToAdd: App.VierkandleSolution[] = [];
 
-        for (const solution: App.VierkandleSolution of vierkandle.solutions) {
-            if (solution.guessed) {
-                addWordLocal(solution);
-            } else if (vierkandleStorage.value.words.includes(solution.word) || vierkandleStorage.value.bonusWords.includes(solution.word)) {
-                solution.guessed = true;
-                wordsToAdd.push(solution);
-            }
+    for (const solution: App.VierkandleSolution of vierkandle.solutions) {
+        if (solution.guessed) {
+            addWordLocal(solution);
+        } else if (vierkandleStorage.value.words.includes(solution.word) || vierkandleStorage.value.bonusWords.includes(solution.word)) {
+            solution.guessed = true;
+            wordsToAdd.push(solution);
         }
+    }
+    if (user) {
         if (wordsToAdd.length > 0) {
             addWordsOnline(wordsToAdd);
         }
-        const wordsToRemove: string[] = [];
-        for (const word of vierkandleStorage.value.words) {
-            if (!vierkandle.solutions.find(solution => solution.word == word)) {
-                wordsToRemove.push(word);
-            }
-        }
-        for (const word of wordsToRemove) {
-            vierkandleStorage.value.words.splice(vierkandleStorage.value.words.indexOf(word), 1);
-        }
-        const bonusWordsToRemove: string[] = [];
-        for (const word of vierkandleStorage.value.bonusWords) {
-            if (!vierkandle.solutions.find(solution => solution.word == word)) {
-                bonusWordsToRemove.push(word);
-            }
-        }
-        for (const word of bonusWordsToRemove) {
-            vierkandleStorage.value.bonusWords.splice(vierkandleStorage.value.words.indexOf(word), 1);
+    }
+    const wordsToRemove: string[] = [];
+    for (const word of vierkandleStorage.value.words) {
+        if (!vierkandle.solutions.find(solution => solution.word == word)) {
+            wordsToRemove.push(word);
         }
     }
+    for (const word of wordsToRemove) {
+        vierkandleStorage.value.words.splice(vierkandleStorage.value.words.indexOf(word), 1);
+    }
+    const bonusWordsToRemove: string[] = [];
+    for (const word of vierkandleStorage.value.bonusWords) {
+        if (!vierkandle.solutions.find(solution => solution.word == word)) {
+            bonusWordsToRemove.push(word);
+        }
+    }
+    for (const word of bonusWordsToRemove) {
+        vierkandleStorage.value.bonusWords.splice(vierkandleStorage.value.words.indexOf(word), 1);
+    }
+
 
     watch(vierkandleStorage, (value) => {
         if (useLocalStorage) {

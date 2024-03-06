@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import Vierkand from "@/Components/Vierkandle/Vierkand.vue";
-import {computed, nextTick, onMounted, ref, reactive, watch} from "vue";
+import {computed, nextTick, onMounted, ref, reactive, watch, Component} from "vue";
 import Connection from "@/Components/Vierkandle/Connection.vue";
 import Checkbox from "@/Components/Checkbox.vue";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
-import {usePage} from "@inertiajs/vue3";
+import {router, usePage} from "@inertiajs/vue3";
 import {useVierkandleStorage} from "@/Composables/useVierkandleStorage";
 import axios from "axios";
 
@@ -16,7 +16,7 @@ const page = usePage();
 const user = computed(() => page.props.auth.user);
 
 const solutions = ref<{
-    [Key: number]: { [Key: string]: VierkandleSolution }
+    [Key: number]: { [Key: string]: App.VierkandleSolution }
 }>({});
 
 const {vierkandleStorage, addWord} = useVierkandleStorage(props.vierkandle);
@@ -26,7 +26,7 @@ onMounted(() => {
         inputField.value?.focus();
     })
 
-    for (const solution of props.vierkandle.solutions) {
+    for (const solution of props.vierkandle.solutions ?? []) {
         let length = solution.word.length;
         if (solution.bonus) {
             length = 777;
@@ -36,9 +36,9 @@ onMounted(() => {
         }
         solutions.value[length][solution.word] = solution;
     }
-    for (const num: number of Object.keys(solutions.value)) {
+    for (const num of Object.keys(solutions.value)) {
         solutions.value[num] = Object.keys(solutions.value[num]).sort().reduce(
-            (obj: { [Key: string]: VierkandleSolution }, key: string) => {
+            (obj: { [Key: string]: App.VierkandleSolution }, key: string) => {
                 obj[key] = solutions.value[num][key];
                 return obj;
             },
@@ -50,7 +50,7 @@ onMounted(() => {
 
 const letters = computed(() => {
     const letters: { letter: string, start: number, includes: number }[] = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < props.vierkandle.size ** 2; i++) {
         const letter = props.vierkandle.letters[i];
         letters.push({letter, start: 0, includes: 0});
     }
@@ -76,7 +76,7 @@ const amountGuessed = computed(() => {
 });
 
 const totalWords = computed(() => {
-    return props.vierkandle.solutions.filter((data) => !data.bonus).length;
+    return props.vierkandle.solutions?.filter((data) => !data.bonus).length ?? 0;
 });
 
 const inputField = ref<HTMLInputElement | null>(null);
@@ -86,7 +86,7 @@ const resultMessage = ref('');
 const showResult = ref(false);
 const rotation = ref(0);
 const renderLines = ref(true);
-const lastSolution = ref<{ word: string, url: string }>(null);
+const lastSolution = ref<{ word: string, url: string } | null>(null);
 
 const letterElements = ref([]);
 
@@ -155,9 +155,9 @@ const findChain = (word: string): number[] => {
     let longestChain: number[] = [];
     for (const start of starts) {
         if (word.length === 1) {
-            return [start.index];
+            return [start.index ?? -1];
         }
-        const chain = recFindChain([start.index], word.substring(1));
+        const chain = recFindChain([start.index ?? -1], word.substring(1));
         if (chain.length > longestChain.length) {
             longestChain = chain;
         }
@@ -184,14 +184,15 @@ const recFindChain = (chain: number[], word: string): number[] => {
 
 const findNeighbours = (index: number): number[] => {
     const neighbours = [];
-    for (let i = -5; i <= 5; i++) {
-        if (i === 0) {
-            continue;
-        }
-        const neighbour = index + i;
-        if (neighbour >= 0 && neighbour < 16) {
-            if (Math.abs(index % 4 - neighbour % 4) <= 1) {
-                neighbours.push(neighbour);
+    const curX = index % props.vierkandle.size;
+    const curY = Math.floor(index / props.vierkandle.size);
+    for (let x = curX - 1; x <= curX + 1; x++) {
+        for (let y = curY - 1; y <= curY + 1; y++) {
+            if (x === curX && y === curY) {
+                continue;
+            }
+            if (x >= 0 && x < props.vierkandle.size && y >= 0 && y < props.vierkandle.size) {
+                neighbours.push(x + y * props.vierkandle.size);
             }
         }
     }
@@ -258,21 +259,26 @@ const chainToInput = () => {
         <div class="py-4 dark:text-white absolute w-full h-full overflow-hidden">
             <input class="opacity-0 fixed top-full" v-model="input" ref="inputField" @input="handleInput"
                    @keydown.enter="guessWord"/>
-            <div class="h-full max-w-7xl px-auto sm:px-6 lg:px-8">
+            <div class="h-full max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div
                     class="h-full p-5 bg-white dark:bg-gray-800 shadow-xl sm:rounded-lg">
                     <div
-                        class="h-full grid grid-cols-1 md:grid-cols-3 items-start content-start overflow-y-auto md:overflow-hidden">
-                        <div class="mx-auto md:mx-0 md:h-full md:overflow-y-auto">
+                        class="h-full grid grid-cols-1 md:grid-cols-3 items-start content-start overflow-y-auto md:overflow-hidden"
+                        style="grid-template-rows: 1fr;"
+                    >
+                        <div class="mx-auto md:mx-0 md:h-full md:overflow-hidden">
+                            <div class="md:h-full md:overflow-y-auto">
                             <div class="mb-2" v-if="amountGuessed/totalWords >= .6">
                                 <h1 class="text-2xl font-bold mb-2">Hints:</h1>
                                 <label class="flex items-center">
-                                    <Checkbox v-model:checked="vierkandleStorage.hints.showMissing" name="hint-missing"/>
+                                    <Checkbox v-model:checked="vierkandleStorage.hints.showMissing"
+                                              name="hint-missing"/>
                                     <span
                                         class="ms-2 text-sm text-gray-600 dark:text-gray-400">Laat missende woorden zien.</span>
                                 </label>
                                 <label class="flex items-center">
-                                    <Checkbox v-model:checked="vierkandleStorage.hints.showLetters" name="hint-letters"/>
+                                    <Checkbox v-model:checked="vierkandleStorage.hints.showLetters"
+                                              name="hint-letters"/>
                                     <span
                                         class="ms-2 text-sm text-gray-600 dark:text-gray-400">Toon sommige letters.</span>
                                 </label>
@@ -312,10 +318,17 @@ const chainToInput = () => {
                                     +{{ Object.values(subSolutions).filter((data) => !data.guessed).length }} woorden te gaan
                                 </span>
                             </div>
+                            </div>
                         </div>
-                        <div class="order-first mb-10 md:mb-0 md:order-none md:col-span-2 flex flex-col items-center">
-                            <div class="w-fit">
-                                <h1 class="text-4xl text-center font-bold mb-2">{{ amountGuessed }}/{{ totalWords }}
+                        <div
+                            class="order-first mb-10 md:h-full md:overflow-hidden md:mb-0 md:order-none md:col-span-2 flex flex-col items-center">
+                            <div class="h-full max-h-full w-full flex flex-col">
+                                <h1 v-if="vierkandle.is_express" class="text-4xl text-center mb-2">Per Ongeluk</h1>
+                                <h1 class="text-4xl text-center font-bold mb-2">
+                                    <div @click="router.get(route(vierkandle.is_express ? 'index' : 'express'))" class="cursor-pointer inline-block -scale-x-100">
+                                        🧩
+                                    </div>
+                                    {{ amountGuessed }}/{{ totalWords }}
                                     woorden
                                     <div @click="() => rotation += 1" class="cursor-pointer inline-block -scale-x-100">
                                         🔄
@@ -345,26 +358,34 @@ const chainToInput = () => {
                                     <a v-if="lastSolution" :href="lastSolution.url" target="_blank"
                                        :class="!showResult && lastSolution ? 'opacity-100 hover:opacity-60 transition-opacity' : ''"
                                        class="opacity-0 absolute text-xl px-2 bg-gray-300 dark:bg-gray-900 border-black dark:border-white border rounded-md left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                                        {{ lastSolution.word }}
+                                        {{ lastSolution?.word }}
                                     </a>
                                 </div>
-                                <div
-                                    class="mx-auto grid grid-cols-4 grid-rows-4 gap-2 w-fit transition-transform duration-500 select-none"
-                                    :style="`transform: rotate(${rotation*90}deg)`">
-                                    <Vierkand v-for="(letter, i) in letters"
-                                              class="transition-transform duration-500"
-                                              @mousedown="dragStart"
-                                              @touchstart="dragStart"
-                                              :style="`transform: rotate(-${rotation*90}deg)`"
-                                              ref="letterElements"
-                                              :active="chain.includes(i)"
-                                              :letter="letter.letter"
-                                              :start="letter.start"
-                                              :includes="letter.includes"
-                                              :show-start="amountGuessed/totalWords >= .2 && letter.start > 0"
-                                              :show-includes="amountGuessed/totalWords >= .4 && letter.includes > 0"
-                                              :is-start="chain.length > 0 && chain[0] == i"
-                                    />
+                                <div class="flex-grow flex-shrink relative">
+                                    <div class="md:absolute w-full h-full">
+                                        <div class="relative mx-auto md:aspect-square h-full max-w-full">
+                                            <div class="mx-auto aspect-square w-full max-h-full" :style="`max-width: ${vierkandle.size*100}px`">
+                                                <div
+                                                    class="vierkandle-grid gap-2 aspect-square overflow-hidden transition-transform duration-500 select-none"
+                                                    :style="`transform: rotateX(${rotation*90}deg);`">
+                                                    <Vierkand v-for="(letter, i) in letters"
+                                                              class="transition-transform duration-500"
+                                                              @mousedown="dragStart"
+                                                              @touchstart="dragStart"
+                                                              :style="`transform: rotateZ(-${rotation*90}deg) ${amountGuessed/totalWords >= 1 ? 'rotateY(360deg)' : ''};`"
+                                                              ref="letterElements"
+                                                              :active="chain.includes(i)"
+                                                              :letter="letter.letter"
+                                                              :start="letter.start"
+                                                              :includes="letter.includes"
+                                                              :show-start="amountGuessed/totalWords >= .2 && letter.start > 0"
+                                                              :show-includes="amountGuessed/totalWords >= .4 && letter.includes > 0"
+                                                              :is-start="chain.length > 0 && chain[0] == i"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -383,3 +404,11 @@ const chainToInput = () => {
         </div>
     </BasicLayout>
 </template>
+
+<style scoped>
+.vierkandle-grid {
+    display: grid;
+    grid-template-columns: repeat(v-bind(props.vierkandle.size), 1fr);
+    grid-template-rows: repeat(v-bind(props.vierkandle.size), 1fr);
+}
+</style>

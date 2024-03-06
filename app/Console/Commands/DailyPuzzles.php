@@ -27,7 +27,15 @@ class DailyPuzzles extends Command
     public function handle() : void
     {
         info('Creating daily puzzles.');
-        Vierkandle::factory()->create();
+        $vierkandle = new Vierkandle();
+        $vierkandle->date = now()->addDay();
+        $vierkandle->is_daily = true;
+        $vierkandle->generate(4);
+        $express = new Vierkandle();
+        $express->date = now()->addDay();
+        $express->is_daily = true;
+        $express->is_express = true;
+        $express->generate(3);
         info('Created vierkandle for tomorrow.');
         info('Done.');
     }

@@ -2,8 +2,11 @@ namespace App {
     export interface Vierkandle {
         id: number;
         letters: string;
-        date: date;
-        solutions_count: number;
+        date: Date;
+        is_daily: boolean;
+        is_express: boolean;
+        solution_count: number;
+        size: number;
         solutions?: VierkandleSolution[];
     }
 
@@ -13,7 +16,7 @@ namespace App {
         url: string;
         bonus: boolean;
         guessed: boolean | null;
-        chain: string;
+        chain: number[];
     }
 
     export interface VierkandleStorage {
