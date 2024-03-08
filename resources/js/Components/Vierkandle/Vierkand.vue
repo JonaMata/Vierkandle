@@ -17,7 +17,7 @@ defineProps<{
         'shadow-2xl border-4 border-red-500 bg-transparent': active,
         'bg-gray-300 dark:bg-gray-900': !active
      }">
-    <div class="letter">
+    <div class="letter dark:fill-white">
         <svg viewBox="0 0 100 100" width="100%" height="100%">
             <text x="50%" y="60%" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" font-size="90">{{ letter }}</text>
         </svg>
@@ -42,8 +42,8 @@ defineProps<{
 
 .hitbox {
     position: absolute;
-    width: calc(var(--size) * .8);
-    height: calc(var(--size) * .8);
+    width: 80%;
+    height: 80%;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);

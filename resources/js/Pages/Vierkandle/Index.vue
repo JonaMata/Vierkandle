@@ -325,7 +325,7 @@ const chainToInput = () => {
                             <div class="h-full max-h-full w-full flex flex-col">
                                 <h1 v-if="vierkandle.is_express" class="text-4xl text-center mb-2">Per Ongeluk</h1>
                                 <h1 class="text-4xl text-center font-bold mb-2">
-                                    <div @click="router.get(route(vierkandle.is_express ? 'index' : 'express'))" class="cursor-pointer inline-block -scale-x-100">
+                                    <div v-if="route().current('index')" @click="router.get(route(vierkandle.is_express ? 'index' : 'express'))" class="cursor-pointer inline-block -scale-x-100">
                                         🧩
                                     </div>
                                     {{ amountGuessed }}/{{ totalWords }}
@@ -367,7 +367,7 @@ const chainToInput = () => {
                                             <div class="mx-auto aspect-square w-full max-h-full" :style="`max-width: ${vierkandle.size*100}px`">
                                                 <div
                                                     class="vierkandle-grid gap-2 aspect-square overflow-hidden transition-transform duration-500 select-none"
-                                                    :style="`transform: rotateX(${rotation*90}deg);`">
+                                                    :style="`transform: rotateZ(${rotation*90}deg);`">
                                                     <Vierkand v-for="(letter, i) in letters"
                                                               class="transition-transform duration-500"
                                                               @mousedown="dragStart"

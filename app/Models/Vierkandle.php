@@ -14,6 +14,11 @@ class Vierkandle extends Model
 
     protected $appends = ['solution_count', 'size'];
 
+    protected $casts = [
+        'is_daily' => 'boolean',
+        'is_express' => 'boolean',
+    ];
+
     public function solutions(): HasMany
     {
         return $this->hasMany(VierkandleSolution::class);
@@ -21,8 +26,8 @@ class Vierkandle extends Model
 
     public function getSolutionsAttribute(): Collection {
         $solutions = $this->solutions()->get();
-        $solved = VierkandleSolve::ofUser(auth()->user(), $this)->solution_ids;
         if (auth()->check()) {
+            $solved = VierkandleSolve::ofUser(auth()->user(), $this)->solution_ids;
             foreach ($solutions as $solution) {
                 $solution->guessed = in_array($solution->id, $solved);
             }
