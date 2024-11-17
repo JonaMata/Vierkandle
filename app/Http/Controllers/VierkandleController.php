@@ -49,7 +49,7 @@ class VierkandleController extends Controller
                 }
                 abort(404);
         }
-        $vierkandles = $vierkandles->orderBy('date', 'desc')->paginate(5);
+        $vierkandles = $vierkandles->orderBy('date', 'desc')->paginate(50);
         $vierkandles->getCollection()->each->setAppends(['size', 'solution_count', 'solutions']);
 
         return Inertia::render('Vierkandle/List', [
