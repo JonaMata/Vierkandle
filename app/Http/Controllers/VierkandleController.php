@@ -30,7 +30,7 @@ class VierkandleController extends Controller
 
     public function list($type = 'dagelijks')
     {
-        $base_query = Vierkandle::query()->where('date', '<=', Carbon::today());
+        $base_query = Vierkandle::query()->with('solutions')->where('date', '<=', Carbon::today());
         $vierkandles = $base_query;
         switch ($type) {
             case 'dagelijks':
@@ -50,12 +50,14 @@ class VierkandleController extends Controller
                 abort(404);
         }
         $vierkandles = $vierkandles->orderBy('date', 'desc')->paginate(50);
-        $vierkandles->getCollection()->each->setAppends(['size', 'solution_count', 'solutions']);
+        $solves = VierkandleSolve::query()->where('user_id', auth()->user()->id)->whereIn('vierkandle_id', $vierkandles->pluck('id'))->get()->groupBy('vierkandle_id');
+        $vierkandles->getCollection()->each->setAppends(['size', 'solution_count']);
 
         return Inertia::render('Vierkandle/List', [
             'types' => [['title' => 'Dagelijkse', 'key' => 'dagelijks'], ['title' => 'Per Ongeluk', 'key' => 'perongeluk'], ...Vierkandle::where('is_daily', false)->where('is_express', false)->where('date', '<=', Carbon::today())->selectRaw('SQRT(LENGTH(letters)) AS type')->groupBy('type')->pluck('type')->map(function ($type) {return ['title' => $type.'x'.$type, 'key' => $type];})],
             'type' => $type,
             'vierkandles' => $vierkandles,
+            'solves' => $solves,
         ]);
 
         $daily = Vierkandle::query()->where('is_daily', true)->where('is_express', false)->where('date', '<=', Carbon::today())->orderBy('date', 'desc')->paginate(5, ['*'], 'daily');

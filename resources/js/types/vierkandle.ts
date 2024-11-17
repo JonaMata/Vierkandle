@@ -19,6 +19,15 @@ namespace App {
         chain: number[];
     }
 
+    export interface VierkandleSolve {
+        id: number,
+        vierkandle_id: number
+        user_id: number,
+        solution_ids: number[],
+        created_at: Date,
+        updated_at: Date,
+    }
+
     export interface VierkandleStorage {
         hints: {showMissing: boolean, showLetters: boolean},
         words: string[],

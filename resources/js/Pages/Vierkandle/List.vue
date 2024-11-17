@@ -6,12 +6,31 @@ import TabView from "@/Components/Tabs/TabView.vue";
 import Tab from "@/Components/Tabs/Tab.vue";
 import Pagination from "@/Components/Pagination.vue";
 import {TabInfo} from "@/Components/Tabs/TabInfo.interface";
+import {onMounted} from "vue";
 
 const props = defineProps<{
     type: string,
     types: { title: string, key: string|number }[],
     vierkandles: {data: App.Vierkandle[], links: any},
+    solves: {[Key: string]: App.VierkandleSolve[]}
 }>()
+
+let processedVierkandles: App.Vierkandle[];
+
+const processSolves = () => {
+    processedVierkandles = props.vierkandles.data;
+    for(let vierkandle = 0; vierkandle < processedVierkandles.length; vierkandle++) {
+        for (let solution = 0; solution < processedVierkandles[vierkandle].solutions!.length; solution++) {
+            if (props.solves[processedVierkandles[vierkandle].id.toString()][0].solution_ids.includes(processedVierkandles[vierkandle].solutions![solution].id)) {
+                processedVierkandles[vierkandle].solutions![solution].guessed = true
+            }
+        }
+    }
+}
+
+onMounted(() => {
+    processSolves()
+})
 </script>
 
 <template>
@@ -27,21 +46,21 @@ const props = defineProps<{
 <!--                            {{types}}-->
 <!--                            <h2 class="text-2xl font-semibold mb-5">Dagelijkse Vierkandles</h2>-->
 <!--                            <div class="flex flex-wrap gap-5 mb-10">-->
-<!--&lt;!&ndash;                                <VierkandlePreview v-for="vierkandle in vierkandles.data" :vierkandle="vierkandle" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                <VierkandlePreview v-for="vierkandle in processedVierkandles.data" :vierkandle="vierkandle" />&ndash;&gt;-->
 <!--                            </div>-->
-<!--                            <Pagination :links="vierkandles.links"/>-->
+<!--                            <Pagination :links="processedVierkandles.links"/>-->
 <!--                        </Tab>-->
 <!--                        <Tab title="Per Ongeluk">-->
 <!--                            <h2 class="text-2xl font-semibold mb-5">Dagelijkse Vierkandle Per ongeluks</h2>-->
 <!--                            <div class="flex flex-wrap gap-5 mb-10">-->
-<!--&lt;!&ndash;                                <VierkandlePreview v-for="vierkandle in vierkandles.data" :vierkandle="vierkandle" />&ndash;&gt;-->
+<!--&lt;!&ndash;                                <VierkandlePreview v-for="vierkandle in processedVierkandles.data" :vierkandle="vierkandle" />&ndash;&gt;-->
 <!--                            </div>-->
-<!--                            <Pagination :links="vierkandles.links"/>-->
+<!--                            <Pagination :links="processedVierkandles.links"/>-->
 <!--                        </Tab>-->
                         <Tab v-for="type in types" :key="type.key" :title="type.title" :click-argument="type.key">
                             <h3 class="text-xl font-semibold mb-5">{{ type.title }} Vierkandles:</h3>
                             <div class="flex flex-wrap gap-5 mb-5">
-                                <VierkandlePreview v-for="vierkandle in vierkandles.data" :vierkandle="vierkandle" />
+                                <VierkandlePreview v-for="vierkandle in processedVierkandles" :vierkandle="vierkandle" />
                             </div>
                             <Pagination :links="vierkandles.links"/>
                         </Tab>
