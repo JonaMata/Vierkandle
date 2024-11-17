@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {router} from "@inertiajs/vue3";
+import {router, usePage} from "@inertiajs/vue3";
 import BasicLayout from "@/Layouts/BasicLayout.vue";
 import VierkandlePreview from "@/Components/Vierkandle/VierkandlePreview.vue";
 import TabView from "@/Components/Tabs/TabView.vue";
@@ -8,17 +8,19 @@ import Pagination from "@/Components/Pagination.vue";
 import {TabInfo} from "@/Components/Tabs/TabInfo.interface";
 import {onMounted} from "vue";
 
+const page = usePage()
+const user = page.props.auth.user;
+
 const props = defineProps<{
     type: string,
     types: { title: string, key: string|number }[],
     vierkandles: {data: App.Vierkandle[], links: any},
-    solves: {[Key: string]: App.VierkandleSolve[]}
+    solves?: {[Key: string]: App.VierkandleSolve[]}
 }>()
 
-let processedVierkandles: App.Vierkandle[];
+let processedVierkandles: App.Vierkandle[] = props.vierkandles.data
 
 const processSolves = () => {
-    processedVierkandles = props.vierkandles.data;
     for(let vierkandle = 0; vierkandle < processedVierkandles.length; vierkandle++) {
         for (let solution = 0; solution < processedVierkandles[vierkandle].solutions!.length; solution++) {
             if (props.solves[processedVierkandles[vierkandle].id.toString()][0].solution_ids.includes(processedVierkandles[vierkandle].solutions![solution].id)) {
@@ -29,7 +31,9 @@ const processSolves = () => {
 }
 
 onMounted(() => {
-    processSolves()
+    if (user) {
+        processSolves()
+    }
 })
 </script>
 

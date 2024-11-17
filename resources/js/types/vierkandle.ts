@@ -34,4 +34,15 @@ namespace App {
         bonusWords: string[],
         mistakes: number,
     }
+
+    export interface SolutionStorage {
+        hints: {
+            showMissing: boolean,
+            showLetters: boolean
+        },
+        words: string[],
+        bonusWords: string[],
+        mistakes: number,
+        version: string,
+    }
 }

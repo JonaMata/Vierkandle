@@ -40,14 +40,14 @@ export function useVierkandleStorage(vierkandle: App.Vierkandle) {
     const vierkandleStorage = ref<App.SolutionStorage>(newSolutionStorage);
 
     if (useLocalStorage && localStorage.getItem(storageName)) {
-        vierkandleStorage.value = JSON.parse(localStorage.getItem(storageName));
+        vierkandleStorage.value = JSON.parse(localStorage.getItem(storageName)!);
         migrateStorage(vierkandleStorage, vierkandle);
     } else {
         vierkandleStorage.value = newSolutionStorage;
     }
     const wordsToAdd: App.VierkandleSolution[] = [];
 
-    for (const solution: App.VierkandleSolution of vierkandle.solutions) {
+    for (const solution of vierkandle.solutions!) {
         if (solution.guessed) {
             addWordLocal(solution);
         } else if (vierkandleStorage.value.words.includes(solution.word) || vierkandleStorage.value.bonusWords.includes(solution.word)) {
@@ -62,7 +62,7 @@ export function useVierkandleStorage(vierkandle: App.Vierkandle) {
     }
     const wordsToRemove: string[] = [];
     for (const word of vierkandleStorage.value.words) {
-        if (!vierkandle.solutions.find(solution => solution.word == word)) {
+        if (!vierkandle.solutions!.find(solution => solution.word == word)) {
             wordsToRemove.push(word);
         }
     }
@@ -71,7 +71,7 @@ export function useVierkandleStorage(vierkandle: App.Vierkandle) {
     }
     const bonusWordsToRemove: string[] = [];
     for (const word of vierkandleStorage.value.bonusWords) {
-        if (!vierkandle.solutions.find(solution => solution.word == word)) {
+        if (!vierkandle.solutions!.find(solution => solution.word == word)) {
             bonusWordsToRemove.push(word);
         }
     }

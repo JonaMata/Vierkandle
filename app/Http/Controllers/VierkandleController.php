@@ -50,7 +50,10 @@ class VierkandleController extends Controller
                 abort(404);
         }
         $vierkandles = $vierkandles->orderBy('date', 'desc')->paginate(50);
-        $solves = VierkandleSolve::query()->where('user_id', auth()->user()->id)->whereIn('vierkandle_id', $vierkandles->pluck('id'))->get()->groupBy('vierkandle_id');
+        $solves = null;
+        if (auth()->check()) {
+            $solves = VierkandleSolve::query()->where('user_id', auth()->user()->id)->whereIn('vierkandle_id', $vierkandles->pluck('id'))->get()->groupBy('vierkandle_id');
+        }
         $vierkandles->getCollection()->each->setAppends(['size', 'solution_count']);
 
         return Inertia::render('Vierkandle/List', [
