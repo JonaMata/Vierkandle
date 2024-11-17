@@ -98,6 +98,9 @@ const reRenderLines = async () => {
 
 watch(rotation, reRenderLines);
 
+const isFinished = computed(() => {
+    return amountGuessed.value/totalWords.value >= 1;
+})
 const guessWord = () => {
     const word = input.value;
     let length = word.length;
@@ -118,7 +121,12 @@ const guessWord = () => {
                 }
                 message += word;
                 lastSolution.value = {word, url: solutions.value[length][word].url};
+                window._paq.push(['trackEvent', 'Puzzle', 'Guess word'])
+                const wasFinished = isFinished.value;
                 addWord(solution);
+                if(isFinished.value && !wasFinished) {
+                    window._paq.push(['trackEvent', 'Puzzle', 'Complete puzzle']);
+                }
             } else {
                 message = 'Al geraden!';
             }
@@ -261,7 +269,7 @@ const chainToInput = () => {
                    @keydown.enter="guessWord"/>
             <div class="h-full max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div
-                    class="h-full p-5 bg-white dark:bg-gray-800 shadow-xl sm:rounded-lg">
+                    class="h-full p-5 bg-white dark:bg-gray-800 shadow-lg sm:rounded-lg">
                     <div
                         class="h-full grid grid-cols-1 md:grid-cols-3 items-start content-start overflow-y-auto md:overflow-hidden"
                         style="grid-template-rows: 1fr;"

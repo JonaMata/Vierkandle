@@ -21,11 +21,11 @@ class VierkandleSolution extends Model
         return $this->belongsTo(Vierkandle::class);
     }
 
-    public function getGuessedAttribute() : bool | null
-    {
-        if (!auth()->check()) {
-            return null;
-        }
-        return in_array($this->id, VierkandleSolve::ofUser(auth()->user(), $this->vierkandle)->solution_ids);
-    }
+//    public function getGuessedAttribute() : bool | null
+//    {
+//        if (!auth()->check()) {
+//            return null;
+//        }
+//        return in_array($this->id, VierkandleSolve::ofUser(auth()->user(), $this->vierkandle)->solution_ids);
+//    }
 }

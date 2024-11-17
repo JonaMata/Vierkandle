@@ -251,6 +251,10 @@ onUnmounted(() => {
             <main class="relative flex-grow flex-shrink overflow-hidden">
                 <slot/>
             </main>
+
+            <footer class="bg-transparent dark:text-white mb-2 mx-4 md:ml-auto md:mr-10">
+                Is er iets stuk of wil je gewoon lekker babbelen? Mail naar <a class="text-gray-500 dark:text-gray-400 hover:text-gray-400 dark:hover:text-gray-500 underline" href="mailto:jonathan@vierkandle.nl">jonathan@vierkandle.nl</a>
+            </footer>
         </div>
     </div>
 </template>

@@ -17,7 +17,7 @@ use Inertia\Inertia;
 Route::middleware([\App\Http\Middleware\ForceHttps::class])->group(function () {
     Route::get('', [\App\Http\Controllers\VierkandleController::class, 'index'])->name('index');
     Route::get('perongeluk', [\App\Http\Controllers\VierkandleController::class, 'express'])->name('express');
-    Route::get('/list', [\App\Http\Controllers\VierkandleController::class, 'list'])->name('list');
+    Route::get('/list/{type?}', [\App\Http\Controllers\VierkandleController::class, 'list'])->name('list');
     Route::get('/{vierkandle}', [\App\Http\Controllers\VierkandleController::class, 'show'])->name('show');
     Route::post('/migrate/migrate', [\App\Http\Controllers\MigrateController::class, 'migrate'])->name('migrate');
 });

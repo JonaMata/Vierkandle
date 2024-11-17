@@ -6,6 +6,7 @@ import SectionBorder from '@/Components/SectionBorder.vue';
 import TwoFactorAuthenticationForm from '@/Pages/Profile/Partials/TwoFactorAuthenticationForm.vue';
 import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from '@/Pages/Profile/Partials/UpdateProfileInformationForm.vue';
+import PrivacySettings from "@/Pages/Profile/Partials/PrivacySettings.vue";
 
 defineProps({
     confirmsTwoFactorAuthentication: Boolean,
@@ -34,6 +35,10 @@ defineProps({
 
                     <SectionBorder />
                 </div>
+
+                <PrivacySettings :user="$page.props.auth.user" />
+
+                <SectionBorder />
 
                 <div v-if="$page.props.jetstream.canManageTwoFactorAuthentication">
                     <TwoFactorAuthenticationForm
