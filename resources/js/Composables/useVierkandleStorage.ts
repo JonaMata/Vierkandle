@@ -19,8 +19,8 @@ export function useVierkandleStorage(vierkandle: App.Vierkandle) {
         }
     }
 
-    const addWordsOnline = (solutions: App.VierkandleSolution[]) => {
-        axios.post(route('guess'), {solutions: solutions}).then((response) => {
+    const addWordsOnline = (solutions: App.VierkandleSolution[], mistakes: number) => {
+        axios.post(route('guess'), {solutions: solutions, mistakes: mistakes}).then((response) => {
             console.log(response);
         }).catch((error) => {
             console.log(error);
@@ -57,7 +57,7 @@ export function useVierkandleStorage(vierkandle: App.Vierkandle) {
     }
     if (user) {
         if (wordsToAdd.length > 0) {
-            addWordsOnline(wordsToAdd);
+            addWordsOnline(wordsToAdd, vierkandleStorage.value.mistakes);
         }
     }
     const wordsToRemove: string[] = [];
@@ -93,7 +93,7 @@ export function useVierkandleStorage(vierkandle: App.Vierkandle) {
     const addWord = (solution: App.VierkandleSolution) => {
         addWordLocal(solution);
         if (user) {
-            addWordsOnline([solution]);
+            addWordsOnline([solution], vierkandleStorage.value.mistakes);
         }
     }
 

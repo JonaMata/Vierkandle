@@ -13,7 +13,7 @@ class VierkandleSolve extends Model
         'solution_ids' => 'array',
     ];
 
-    protected $fillable = ['vierkandle_id', 'user_id', 'solution_ids'];
+    protected $fillable = ['vierkandle_id', 'user_id', 'solution_ids', 'mistakes'];
 
     public function vierkandle()
     {

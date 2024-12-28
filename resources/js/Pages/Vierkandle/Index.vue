@@ -99,7 +99,7 @@ const reRenderLines = async () => {
 watch(rotation, reRenderLines);
 
 const isFinished = computed(() => {
-    return amountGuessed.value/totalWords.value >= 1;
+    return amountGuessed.value / totalWords.value >= 1;
 })
 const guessWord = () => {
     const word = input.value;
@@ -124,7 +124,7 @@ const guessWord = () => {
                 window._paq.push(['trackEvent', 'Puzzle', 'Guess word'])
                 const wasFinished = isFinished.value;
                 addWord(solution);
-                if(isFinished.value && !wasFinished) {
+                if (isFinished.value && !wasFinished) {
                     window._paq.push(['trackEvent', 'Puzzle', 'Complete puzzle']);
                 }
             } else {
@@ -276,56 +276,57 @@ const chainToInput = () => {
                     >
                         <div class="mx-auto md:mx-0 md:h-full md:overflow-hidden">
                             <div class="md:h-full md:overflow-y-auto">
-                            <div class="mb-2" v-if="amountGuessed/totalWords >= .6">
-                                <h1 class="text-2xl font-bold mb-2">Hints:</h1>
-                                <label class="flex items-center">
-                                    <Checkbox v-model:checked="vierkandleStorage.hints.showMissing"
-                                              name="hint-missing"/>
-                                    <span
-                                        class="ms-2 text-sm text-gray-600 dark:text-gray-400">Laat missende woorden zien.</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <Checkbox v-model:checked="vierkandleStorage.hints.showLetters"
-                                              name="hint-letters"/>
-                                    <span
-                                        class="ms-2 text-sm text-gray-600 dark:text-gray-400">Toon sommige letters.</span>
-                                </label>
-                            </div>
-                            <div class="mb-4" v-for="(subSolutions, num) in solutions">
-                                <h1 class="text-2xl font-bold mb-2">
-                                    <template v-if="num == 777">
-                                        Bonuswoorden:
-                                    </template>
-                                    <template v-else>
-                                        {{ num }} letter woorden:
-                                    </template>
-                                </h1>
-                                <div class="flex flex-wrap gap-2">
-                                    <template v-for="(data, word) in subSolutions">
-                                        <div v-if="data.guessed">
-                                            <a v-if="data.url" :href="data.url" target="_blank"
-                                               class="border-b border-black dark:border-white border-dashed">
-                                                {{ word }}
-                                            </a>
-                                            <template v-else>
-                                                {{ word }}
-                                            </template>
-                                        </div>
-                                        <div v-else-if="vierkandleStorage.hints.showLetters" class="text-gray-400">{{
-                                                word.substring(0, Math.ceil(word.length / 6)) + '*'.repeat((word.length - Math.floor(word.length / 6)) - (Math.ceil(word.length / 6))) + word.substring(word.length - Math.floor(word.length / 6), word.length)
-                                            }}
-                                        </div>
-                                        <div v-else-if="vierkandleStorage.hints.showMissing" class="text-gray-400">
-                                            {{ '*'.repeat(word.length) }}
-                                        </div>
-                                    </template>
+                                <div class="mb-2" v-if="amountGuessed/totalWords >= .6">
+                                    <h1 class="text-2xl font-bold mb-2">Hints:</h1>
+                                    <label class="flex items-center">
+                                        <Checkbox v-model:checked="vierkandleStorage.hints.showMissing"
+                                                  name="hint-missing"/>
+                                        <span
+                                            class="ms-2 text-sm text-gray-600 dark:text-gray-400">Laat missende woorden zien.</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <Checkbox v-model:checked="vierkandleStorage.hints.showLetters"
+                                                  name="hint-letters"/>
+                                        <span
+                                            class="ms-2 text-sm text-gray-600 dark:text-gray-400">Toon sommige letters.</span>
+                                    </label>
                                 </div>
-                                <span
-                                    v-if="!vierkandleStorage.hints.showLetters && !vierkandleStorage.hints.hintMissing && Object.values(subSolutions).filter((data) => !data.guessed).length > 0"
-                                    class="text-gray-600 dark:text-gray-400 italic">
+                                <div class="mb-4" v-for="(subSolutions, num) in solutions">
+                                    <h1 class="text-2xl font-bold mb-2">
+                                        <template v-if="num == 777">
+                                            Bonuswoorden:
+                                        </template>
+                                        <template v-else>
+                                            {{ num }} letter woorden:
+                                        </template>
+                                    </h1>
+                                    <div class="flex flex-wrap gap-2">
+                                        <template v-for="(data, word) in subSolutions">
+                                            <div v-if="data.guessed">
+                                                <a v-if="data.url" :href="data.url" target="_blank"
+                                                   class="border-b border-black dark:border-white border-dashed">
+                                                    {{ word }}
+                                                </a>
+                                                <template v-else>
+                                                    {{ word }}
+                                                </template>
+                                            </div>
+                                            <div v-else-if="vierkandleStorage.hints.showLetters" class="text-gray-400">
+                                                {{
+                                                    word.substring(0, Math.ceil(word.length / 6)) + '*'.repeat((word.length - Math.floor(word.length / 6)) - (Math.ceil(word.length / 6))) + word.substring(word.length - Math.floor(word.length / 6), word.length)
+                                                }}
+                                            </div>
+                                            <div v-else-if="vierkandleStorage.hints.showMissing" class="text-gray-400">
+                                                {{ '*'.repeat(word.length) }}
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <span
+                                        v-if="!vierkandleStorage.hints.showLetters && !vierkandleStorage.hints.hintMissing && Object.values(subSolutions).filter((data) => !data.guessed).length > 0"
+                                        class="text-gray-600 dark:text-gray-400 italic">
                                     +{{ Object.values(subSolutions).filter((data) => !data.guessed).length }} woorden te gaan
                                 </span>
-                            </div>
+                                </div>
                             </div>
                         </div>
                         <div
@@ -333,7 +334,9 @@ const chainToInput = () => {
                             <div class="h-full max-h-full w-full flex flex-col">
                                 <h1 v-if="vierkandle.is_express" class="text-4xl text-center mb-2">Per Ongeluk</h1>
                                 <h1 class="text-4xl text-center font-bold mb-2">
-                                    <div v-if="route().current('index')" @click="router.get(route(vierkandle.is_express ? 'index' : 'express'))" class="cursor-pointer inline-block -scale-x-100">
+                                    <div v-if="route().current('index')"
+                                         @click="router.get(route(vierkandle.is_express ? 'index' : 'express'))"
+                                         class="cursor-pointer inline-block -scale-x-100">
                                         🧩
                                     </div>
                                     {{ amountGuessed }}/{{ totalWords }}
@@ -350,6 +353,12 @@ const chainToInput = () => {
                                          :class="amountGuessed/totalWords >= .6 ? 'opacity-0' : ''"
                                          :style="`left: ${amountGuessed/totalWords < .2 ? '20' : amountGuessed/totalWords < .4 ? '40' : '60'}%`">
                                         ⭐️
+                                    </div>
+                                    <div v-if="amountGuessed >= totalWords && vierkandleStorage.mistakes === 0"
+                                         class="absolute flex justify-around text-2xl w-full h-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                        <div v-for="i in 10" class="animate-bounce" >
+                                            🦆
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="flex relative mb-2">
@@ -372,7 +381,8 @@ const chainToInput = () => {
                                 <div class="flex-grow flex-shrink relative">
                                     <div class="md:absolute w-full h-full">
                                         <div class="relative mx-auto md:aspect-square h-full max-w-full">
-                                            <div class="mx-auto aspect-square w-full max-h-full" :style="`max-width: ${vierkandle.size*100}px`">
+                                            <div class="mx-auto aspect-square w-full max-h-full"
+                                                 :style="`max-width: ${vierkandle.size*100}px`">
                                                 <div
                                                     class="vierkandle-grid gap-2 aspect-square overflow-hidden transition-transform duration-500 select-none"
                                                     :style="`transform: rotateZ(${rotation*90}deg);`">

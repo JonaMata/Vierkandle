@@ -45,4 +45,10 @@ namespace App {
         mistakes: number,
         version: string,
     }
+
+    export enum VierkandleSolveState {
+        UNSOLVED = 'unsolved',
+        SOLVED = 'solved',
+        PERFECT = 'perfect',
+    }
 }

@@ -40,7 +40,7 @@ const totalWords = computed(() => {
                      :style="`width: ${solutionsFound/totalWords*100}%`"></div>
             </div>
         </div>
-        <div v-if="solutionsFound >= vierkandle.solution_count" class="absolute text-4xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">✅</div>
+        <div v-if="solutionsFound >= vierkandle.solution_count" class="absolute text-4xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">{{ vierkandleStorage.mistakes === 0 ? '🦆' : '✅' }}</div>
     </a>
 </template>
 

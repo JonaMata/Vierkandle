@@ -97,9 +97,15 @@ class VierkandleController extends Controller
             'solutions.*' => 'required|array',
             'solutions.*.id' => 'required|integer|exists:vierkandle_solutions,id',
             'solutions.*.word' => 'required|string',
+            'mistakes' => 'required|integer',
         ]);
+        $mistakesSet = false;
         foreach ($validated['solutions'] as $word) {
             $vierkandleSolution = VierkandleSolution::query()->findOrFail($word['id']);
+            if (!$mistakesSet) {
+                VierkandleSolve::ofUser(auth()->user(), $vierkandleSolution->vierkandle)->update(['mistakes' => $validated['mistakes']]);
+                $mistakesSet = true;
+            }
             if ($vierkandleSolution->word !== $word['word']) {
                 return response()->json(['success' => false, 'message' => "Word doesn't match solution"]);
             }
