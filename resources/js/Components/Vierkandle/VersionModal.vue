@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DialogModal from "@/Components/DialogModal.vue";
-import {onMounted, ref} from "vue";
+import {onMounted, Ref, ref} from "vue";
 import {useVersion} from "@/Composables/useVersion";
 import markdownit from "markdown-it";
 import ApplicationMark from "@/Components/ApplicationMark.vue";
@@ -9,9 +9,11 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 
 const showModal = ref(false);
 const version = useVersion();
-const notesToShow = ref([]);
+const notesToShow: Ref<{version: string, content: () => Promise<typeof import("*?raw")>, rendered?: string}[]> = ref([]);
 
-const md = markdownit();
+const md = markdownit({
+    html: true,
+});
 
 const releaseNotes = [
     {version: "0.0.0", content : () => import("@/ReleaseNotes/0.0.0.md?raw")},
@@ -21,6 +23,7 @@ const releaseNotes = [
     {version: "0.1.4", content: () => import("@/ReleaseNotes/0.1.4.md?raw")},
     {version: "0.2.0", content: () => import("@/ReleaseNotes/0.2.0.md?raw")},
     {version: "0.2.1", content: () => import("@/ReleaseNotes/0.2.1.md?raw")},
+    {version: "1.0.0", content: () => import("@/ReleaseNotes/1.0.0.md?raw")},
 ]
 
 onMounted(async () => {
@@ -29,7 +32,8 @@ onMounted(async () => {
         if (notesToShow.value.length > 0) {
             for (const note of notesToShow.value) {
                 const content = await note.content();
-                note.content = md.render(content.default);
+                console.log(md.render(content.default))
+                note.rendered = md.render(content.default);
             }
             showModal.value = true;
         }
@@ -54,7 +58,7 @@ const closeModal = () => {
         <template #content>
             <div class="min-w-full flex flex-col gap-10 prose dark:prose-invert prose-sm md:prose-base overflow-y-auto max-h-[70dvh]">
                 <div v-for="(note, index) in notesToShow"
-                     v-html="note.content"
+                     v-html="note.rendered"
                      :class="{ 'border-t border-gray-300 dark:border-gray-700 pt-10': index > 0}"
                 >
                 </div>
