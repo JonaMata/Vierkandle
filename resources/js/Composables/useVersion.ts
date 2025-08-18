@@ -7,7 +7,7 @@ export function useVersion() {
     const storageName = 'version';
     const useLocalStorage = !!localStorage;
     if (useLocalStorage && localStorage.getItem(storageName)) {
-        version.value = localStorage.getItem(storageName);
+        version.value = localStorage.getItem(storageName)!;
     }
     watch(version, (value) => {
         if (useLocalStorage) {

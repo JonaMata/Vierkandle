@@ -1,7 +1,9 @@
+import {Ref} from "vue";
+
 export class BaseMigration {
 
     static version = "0.0.0";
-    public static up() {
+    public static up(vierkandleStrorage: Ref, vierkandle: App.Vierkandle) {
         //
     }
 

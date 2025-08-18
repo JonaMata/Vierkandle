@@ -252,8 +252,14 @@ onUnmounted(() => {
                 <slot/>
             </main>
 
-            <footer class="bg-transparent dark:text-white mb-2 mx-4 md:ml-auto md:mr-10">
-                Is er iets stuk of wil je gewoon lekker babbelen? Mail naar <a class="text-gray-500 dark:text-gray-400 hover:text-gray-400 dark:hover:text-gray-500 underline" href="mailto:jonathan@vierkandle.nl">jonathan@vierkandle.nl</a>
+            <footer class="bg-transparent dark:text-white text-xs md:text-sm lg:text-base mb-2 mx-4 md:mx-12 flex flex-row justify-between gap-4">
+                <div>
+                    Vind je Vierkandle leuk? Je kan hier <a class="rounded-md bg-red-500 text-white px-2 py-0.5" href="https://donate.stripe.com/3cs9C646979b9Us3cc">Doneren</a>
+                </div>
+
+                <div>
+                    Is er iets stuk of wil je gewoon lekker babbelen? Mail naar <a class="text-gray-500 dark:text-gray-400 hover:text-gray-400 dark:hover:text-gray-500 underline" href="mailto:jonathan@vierkandle.nl">jonathan@vierkandle.nl</a>
+                </div>
             </footer>
         </div>
     </div>
