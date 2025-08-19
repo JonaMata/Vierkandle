@@ -147,7 +147,14 @@ class Vierkandle extends Model
         $client = new \GuzzleHttp\Client(['base_uri' => 'https://nl.wiktionary.org', 'allow_redirects' => false]);
         foreach ($solutions as $solution) {
             $url = 'w/index.php?search=' . strtolower($solution['word']) . '&ns0=1';
-            $response = $client->request('GET', $url, ['http_errors' => false]);
+            $response = $client->request('GET', $url, [
+                'http_errors' => false,
+                'delay' => 0.2, // To avoid wikimedia rate limiting
+                'headers' => [
+                    'User-Agent' => 'Vierkandle/1.0 (jonathan@vierkandle.nl) Guzzle/Laravel/7.9.2 bot',
+                    'Accept-Encoding' => 'gzip',
+                ]
+            ]);
             $solution['url'] = $response->getStatusCode() == 302 ? $response->getHeader('location')[0] : null;
             if (!$solution['url']) {
                 $solution['bonus'] = true;
