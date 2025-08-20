@@ -156,7 +156,7 @@ class Vierkandle extends Model
                 ]
             ]);
             $solution['url'] = $response->getStatusCode() == 302 ? $response->getHeader('location')[0] : null;
-            if (!$solution['url']) {
+            if (!$solution['url'] && $response->getStatusCode() != 429) {
                 $solution['bonus'] = true;
             }
             $this->solutions()->create($solution);
