@@ -144,19 +144,16 @@ class Vierkandle extends Model
     private function saveWithSolutions(array $solutions): void
     {
         $this->save();
-        $client = new \GuzzleHttp\Client(['base_uri' => 'https://nl.wiktionary.org', 'allow_redirects' => false]);
+        $link_list = array();
+        foreach (file(base_path() . '/resources/files/wiktionary.txt') as $line) {
+            $splits = explode(',', trim($line));
+            $link_list[$splits[0]] = $splits[1];
+        }
         foreach ($solutions as $solution) {
-            $url = 'w/index.php?search=' . strtolower($solution['word']) . '&ns0=1';
-            $response = $client->request('GET', $url, [
-                'http_errors' => false,
-                'delay' => 0.2, // To avoid wikimedia rate limiting
-                'headers' => [
-                    'User-Agent' => 'Vierkandle/1.0 (jonathan@vierkandle.nl) Guzzle/Laravel/7.9.2 bot',
-                    'Accept-Encoding' => 'gzip',
-                ]
-            ]);
-            $solution['url'] = $response->getStatusCode() == 302 ? $response->getHeader('location')[0] : null;
-            if (!$solution['url'] && $response->getStatusCode() != 429) {
+            if (array_key_exists($solution['word'], $link_list)) {
+                $solution['url'] = $link_list[$solution['word']];
+            } else {
+                $solution['url'] = null;
                 $solution['bonus'] = true;
             }
             $this->solutions()->create($solution);

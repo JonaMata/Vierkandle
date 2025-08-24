@@ -27,15 +27,16 @@ class Vierkandle extends Command
     {
         $vierkandle = new \App\Models\Vierkandle();
         $vierkandle->date = $this->argument('date') ?? now();
+        $vierkandle->is_daily = false;
 
         $tries = $vierkandle->generate($this->argument('size'), $this->argument('word'));
-        info("Generated vierkandle for {$vierkandle->date} with {$tries} tries.");
+        \Laravel\Prompts\info("Generated vierkandle for {$vierkandle->date} with {$tries} tries.");
         for ($i = 0; $i < $vierkandle->size; $i++) {
             $row = [];
             for ($j = 0; $j < $vierkandle->size; $j++) {
-                $row[] = $vierkandle->letters[$i][$j];
+                $row[] = str_split($vierkandle->letters)[$i*$vierkandle->size+$j];
             }
-            info(implode(' ', $row));
+            \Laravel\Prompts\info(implode(' ', $row));
         }
     }
 }
