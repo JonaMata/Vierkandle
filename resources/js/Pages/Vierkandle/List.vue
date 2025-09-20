@@ -18,23 +18,23 @@ const props = defineProps<{
     solves?: {[Key: string]: App.VierkandleSolve[]}
 }>()
 
+console.log(props.solves)
+
 let processedVierkandles: App.Vierkandle[] = props.vierkandles.data
 
 const processSolves = () => {
     for(let vierkandle = 0; vierkandle < processedVierkandles.length; vierkandle++) {
         for (let solution = 0; solution < processedVierkandles[vierkandle].solutions!.length; solution++) {
-            if (props.solves[processedVierkandles[vierkandle].id.toString()][0].solution_ids.includes(processedVierkandles[vierkandle].solutions![solution].id)) {
+            if (props.solves && props.solves[processedVierkandles[vierkandle].id.toString()] && props.solves[processedVierkandles[vierkandle].id.toString()][0].solution_ids.includes(processedVierkandles[vierkandle].solutions![solution].id)) {
                 processedVierkandles[vierkandle].solutions![solution].guessed = true
             }
         }
     }
 }
 
-onMounted(() => {
-    if (user) {
-        processSolves()
-    }
-})
+if (user) {
+    processSolves()
+}
 </script>
 
 <template>
