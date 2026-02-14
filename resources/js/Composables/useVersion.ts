@@ -3,7 +3,7 @@ import {ref, watch} from "vue";
 import axios from "axios";
 
 export function useVersion() {
-    const version = ref('0.0.0');
+    const version = ref('unknown');
     const storageName = 'version';
     const useLocalStorage = !!localStorage;
     if (useLocalStorage && localStorage.getItem(storageName)) {
