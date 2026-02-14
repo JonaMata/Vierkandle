@@ -18,8 +18,6 @@ const props = defineProps<{
     solves?: {[Key: string]: App.VierkandleSolve[]}
 }>()
 
-console.log(props.solves)
-
 let processedVierkandles: App.Vierkandle[] = props.vierkandles.data
 
 const processSolves = () => {

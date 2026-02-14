@@ -28,6 +28,10 @@ const releaseNotes = [
 ]
 
 onMounted(async () => {
+    if (version.value == 'unknown') {
+        version.value = releaseNotes[releaseNotes.length - 1].version;
+        return;
+    }
     if (version.value <= releaseNotes[releaseNotes.length - 1].version) {
         notesToShow.value = releaseNotes.filter((note) => note.version > version.value).reverse();
         if (notesToShow.value.length > 0) {
